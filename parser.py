@@ -6,7 +6,7 @@ from annotations import (
     is_lifecycle_annotation,
     is_meta_annotation
 )
-from models import TestClass, TestFile, TestMethod
+from models import SourceLocation, TestClass, TestFile, TestMethod
 
 class JavaParser:
 
@@ -35,26 +35,30 @@ class JavaParser:
     def _parse_classes(self, tree, test_file: TestFile):
         for type_decl in tree.types:
             if isinstance(type_decl, ClassDeclaration):
-                test_class = self._create_test_class(type_decl)
+                test_class = self._create_test_class(type_decl, test_file.path)
 
                 test_file.classes.append(test_class)
 
-    def _parse_nested_classes(self, node, test_class: TestClass):
+    def _parse_nested_classes(self, node, file_path, test_class: TestClass):
 
         for nested in node.body:
             if isinstance(nested, ClassDeclaration):
 
                 if self._has_annotation(nested, "Nested"):
 
-                    nested_class = self._create_test_class(nested)
+                    nested_class = self._create_test_class(nested, file_path)
 
                     test_class.nested_classes.append(nested_class)
 
-    def _parse_methods(self, class_node, test_class: TestClass):
+    def _parse_methods(self, class_node, test_class: TestClass, path: str):
 
         for method in class_node.methods:
             test_method = TestMethod(
-                name=method.name
+                name=method.name,
+                location=SourceLocation(
+                    path=path,
+                    line=method.position.line
+                )
             )
 
             self._parse_annotations(method, test_method)
@@ -79,12 +83,18 @@ class JavaParser:
 
         return annotation.element.value.strip('"')
 
-    def _create_test_class(self, node) -> TestClass:
-        test_class = TestClass(name=node.name)
+    def _create_test_class(self, node, file_path: str) -> TestClass:
+        test_class = TestClass(
+            name=node.name,
+            location=SourceLocation(
+                path=file_path,
+                line=node.position.line
+            )
+        )
 
         self._parse_annotations(node, test_class)
-        self._parse_methods(node, test_class)
-        self._parse_nested_classes(node, test_class)
+        self._parse_methods(node, test_class, file_path)
+        self._parse_nested_classes(node, file_path, test_class)
 
         return test_class
 

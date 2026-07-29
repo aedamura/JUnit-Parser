@@ -1,5 +1,6 @@
 import os
 import sys
+from textwrap import dedent
 from unittest import result
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -16,8 +17,7 @@ def test_parser_reads_package_and_class(tmp_path):
 
     java_file = tmp_path / "UserTest.java"
 
-    java_file.write_text(
-        """
+    java_file.write_text(dedent("""\
         package com.example.users;
 
         import org.junit.jupiter.api.Test;
@@ -33,8 +33,7 @@ def test_parser_reads_package_and_class(tmp_path):
             void shouldCreateUser() {
             }
         }
-        """
-    )
+    """))
 
     test_file = SourceTestFile(
         path=str(java_file)
@@ -70,14 +69,15 @@ def test_parser_reads_package_and_class(tmp_path):
     assert result.classes[0].display_name == "User Management Tests"
     assert result.classes[0].annotations == ["DisplayName"]
     assert result.classes[0].tags == []
+    assert result.classes[0].location.path == str(java_file) # type: ignore
+    assert result.classes[0].location.line == 8 # type: ignore
     
 
 def test_parser_reads_methods_with_annotations(tmp_path):
 
     java_file = tmp_path / "UserTest.java"
 
-    java_file.write_text(
-        """
+    java_file.write_text(dedent("""\
         package com.example.users;
 
         import org.junit.jupiter.api.Test;
@@ -92,8 +92,7 @@ def test_parser_reads_methods_with_annotations(tmp_path):
             void shouldCreateUser() {
             }
         }
-        """
-    )
+    """))
 
     test_file = SourceTestFile(
         path=str(java_file)
@@ -109,13 +108,15 @@ def test_parser_reads_methods_with_annotations(tmp_path):
     assert result.classes[0].methods[0].name == "shouldCreateUser"
     assert result.classes[0].methods[0].annotations == ["Test", "Tag", "DisplayName"]
     assert result.classes[0].methods[0].tags == ["user-management"]
+    assert result.classes[0].methods[0].display_name == "Creates a new user"
+    assert result.classes[0].methods[0].location.path == str(java_file) # type: ignore
+    assert result.classes[0].methods[0].location.line == 12 # type: ignore
 
 def test_parser_reads_nested_classes(tmp_path):
 
     java_file = tmp_path / "UserTest.java"
 
-    java_file.write_text(
-        """
+    java_file.write_text(dedent("""\
         package com.example.users;
 
         import org.junit.jupiter.api.Nested;
@@ -146,8 +147,7 @@ def test_parser_reads_nested_classes(tmp_path):
                 }
             }
         }
-        """
-    )
+    """))
 
     test_file = SourceTestFile(
         path=str(java_file)
@@ -162,14 +162,15 @@ def test_parser_reads_nested_classes(tmp_path):
 
     root = result.classes[0]
 
-    print(f"Root class: {root.name}, Nested classes: {[cls.name for cls in root.nested_classes]}")
     assert len(root.nested_classes) == 1
     nested = root.nested_classes[0]
     assert nested.name == "LoginTests"
     assert nested.annotations == ["Nested"]
     assert len(nested.methods) == 1
     assert nested.methods[0].name == "shouldLoginSuccessfully"
-
+    assert nested.methods[0].annotations == ["Test"]
+    assert nested.methods[0].location.path == str(java_file) # type: ignore
+    assert nested.methods[0].location.line == 12 # type: ignore
 
     assert len(nested.nested_classes) == 1
     sub_nested = nested.nested_classes[0]
@@ -177,3 +178,6 @@ def test_parser_reads_nested_classes(tmp_path):
     assert sub_nested.annotations == ["Nested"]
     assert len(sub_nested.methods) == 1
     assert sub_nested.methods[0].name == "shouldFailWithInvalidCredentials"
+    assert sub_nested.methods[0].annotations == ["Test"]
+    assert sub_nested.methods[0].location.path == str(java_file) # type: ignore
+    assert sub_nested.methods[0].location.line == 19 # type: ignore
