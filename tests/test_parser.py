@@ -1,5 +1,6 @@
 import os
 import sys
+from unittest import result
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
@@ -22,6 +23,10 @@ def test_parser_reads_package_and_class(tmp_path):
         import org.junit.jupiter.api.Test;
 
         class UserTest {
+
+            @Test
+            void shouldCreateUser() {
+            }
         }
         """
     )
@@ -40,3 +45,16 @@ def test_parser_reads_package_and_class(tmp_path):
     ]
     assert len(result.classes) == 1
     assert result.classes[0].name == "UserTest"
+
+    assert len(result.classes) == 1
+
+    test_class = result.classes[0]
+
+    assert test_class.name == "UserTest"
+
+    assert len(test_class.methods) == 1
+
+    method = test_class.methods[0]
+
+    assert method.name == "shouldCreateUser"
+    assert method.annotations == ["Test"]
