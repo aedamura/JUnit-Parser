@@ -29,6 +29,7 @@ JUnit Parser/
     analyzer.py
     annotations.py
     indexer.py
+    markdown_generator.py
     models.py
     parser.py
     scanner.py
