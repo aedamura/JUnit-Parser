@@ -1,7 +1,11 @@
 import javalang
 
 from javalang.tree import ClassDeclaration, MethodDeclaration
-
+from annotations import (
+    is_test_annotation,
+    is_lifecycle_annotation,
+    is_meta_annotation
+)
 from models import TestClass, TestFile, TestMethod
 
 class JavaParser:
@@ -34,6 +38,8 @@ class JavaParser:
                 name= node.name
             )
 
+            self._parse_annotations(node, test_class)
+
             self._parse_methods(node, test_class)
 
             test_file.classes.append(test_class)
@@ -49,21 +55,17 @@ class JavaParser:
 
             test_class.methods.append(test_method)
 
-    def _parse_annotations(self, method_node, target: TestMethod):
+    def _parse_annotations(self, method_node, target):
         for annotation in method_node.annotations:
             target.annotations.append(annotation.name)
 
-            if annotation.name == "Tag":
-                value = self._get_annotation_value(annotation)
+            value  = self._get_annotation_value(annotation)
 
-                if value:
-                    target.tags.append(value)
+            if annotation.name == "Tag" and value:
+                target.tags.append(value)
 
-            elif annotation.name == "DisplayName":
-                value = self._get_annotation_value(annotation)
-
-                if value:
-                    target.display_name = value
+            elif annotation.name == "DisplayName" and value:
+                target.display_name = value
 
     def _get_annotation_value(self, annotation):
         if annotation.element is None:

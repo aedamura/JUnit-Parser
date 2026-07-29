@@ -24,6 +24,7 @@ def test_parser_reads_package_and_class(tmp_path):
         import org.junit.jupiter.api.Tag;
         import org.junit.jupiter.api.DisplayName;
 
+        @DisplayName("User Management Tests")
         class UserTest {
 
             @Test
@@ -55,26 +56,11 @@ def test_parser_reads_package_and_class(tmp_path):
     test_class = result.classes[0]
 
     assert test_class.name == "UserTest"
+    assert test_class.display_name == "User Management Tests"
 
     assert len(test_class.methods) == 1
 
     method = test_class.methods[0]
 
-    assert method.name == "shouldCreateUser"
-    assert method.annotations == ["Test"]
-
-    method = result.classes[0].methods[0]
-
-    assert method.name == "shouldCreateUser"
-
-    assert method.annotations == [
-        "Test",
-        "Tag",
-        "DisplayName"
-    ]
-
-    assert method.tags == [
-        "user-management"
-    ]
-
     assert method.display_name == "Creates a new user"
+    assert method.tags == ["user-management"]

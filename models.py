@@ -17,6 +17,7 @@ class TestMethod:
 @dataclass
 class TestClass:
     name: str
+    display_name: str | None = None
     annotations: list[str] = field(default_factory=list)
     tags: list[str] = field(default_factory=list)
     methods: list[TestMethod] = field(default_factory=list)
