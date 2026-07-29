@@ -42,23 +42,16 @@ class JavaParser:
     def _parse_nested_classes(self, node, file_path, test_class: TestClass):
 
         for nested in node.body:
-            if isinstance(nested, ClassDeclaration):
-
-                if self._has_annotation(nested, "Nested"):
-
-                    nested_class = self._create_test_class(nested, file_path)
-
-                    test_class.nested_classes.append(nested_class)
+            if isinstance(nested, ClassDeclaration) and self._has_annotation(nested, "Nested"):
+                nested_class = self._create_test_class(nested, file_path)
+                test_class.nested_classes.append(nested_class)
 
     def _parse_methods(self, class_node, test_class: TestClass, path: str):
 
         for method in class_node.methods:
             test_method = TestMethod(
                 name=method.name,
-                location=SourceLocation(
-                    path=path,
-                    line=method.position.line
-                )
+                location= self._create_location(method, path)
             )
 
             self._parse_annotations(method, test_method)
@@ -86,10 +79,7 @@ class JavaParser:
     def _create_test_class(self, node, file_path: str) -> TestClass:
         test_class = TestClass(
             name=node.name,
-            location=SourceLocation(
-                path=file_path,
-                line=node.position.line
-            )
+            location= self._create_location(node, file_path)
         )
 
         self._parse_annotations(node, test_class)
@@ -102,4 +92,10 @@ class JavaParser:
         return any(
             annotation.name == annotation_name
             for annotation in node.annotations
+        )
+
+    def _create_location(self, node, file_path: str) -> SourceLocation:
+        return SourceLocation(
+            path=file_path,
+            line=node.position.line
         )
