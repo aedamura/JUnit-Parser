@@ -54,8 +54,6 @@ def test_generator_creates_markdown_file(tmp_path):
     assert "user-management" in content
     assert "UserTest.java:14" in content
 
-    print(content)
-
 def test_generator_handles_empty_test_class(tmp_path):
 
     project = Project(
@@ -138,44 +136,44 @@ def test_generator_only_lists_tests(tmp_path):
 
 def test_generator_produces_correct_summary(tmp_path):
     project = Project(
-            test_files=[
-                TestFile(
-                    path="UserTest.java",
-                    package="com.example.users",
-                    classes=[
-                        TestClass(
-                            name="UserTest",
-                            display_name="User Management Tests",
-                            methods=[
-                                TestMethod(
-                                    name="shouldCreateUser",
-                                    display_name="Creates a new user",
-                                    is_test=True,
-                                    is_disabled=False,
-                                    tags=["user-management"],
-                                    location=SourceLocation(
-                                        path="UserTest.java",
-                                        line=14
-                                    )
-                                ),
-                                TestMethod(
-                                    name="setup",
-                                    display_name="Sets up unit tests",
-                                    is_test=False,
-                                    tags=["user-management"],
-                                    lifecycle="BeforeEach",
-                                    is_disabled=False,
-                                    location=SourceLocation(
-                                        path="UserTest.java",
-                                        line=32
-                                    )
+        test_files=[
+            TestFile(
+                path="UserTest.java",
+                package="com.example.users",
+                classes=[
+                    TestClass(
+                        name="UserTest",
+                        display_name="User Management Tests",
+                        methods=[
+                            TestMethod(
+                                name="shouldCreateUser",
+                                display_name="Creates a new user",
+                                is_test=True,
+                                is_disabled=False,
+                                tags=["user-management"],
+                                location=SourceLocation(
+                                    path="UserTest.java",
+                                    line=14
                                 )
-                            ]
-                        )
-                    ]
-                )
-            ]
-        )
+                            ),
+                            TestMethod(
+                                name="setup",
+                                display_name="Sets up unit tests",
+                                is_test=False,
+                                tags=["user-management"],
+                                lifecycle="BeforeEach",
+                                is_disabled=False,
+                                location=SourceLocation(
+                                    path="UserTest.java",
+                                    line=32
+                                )
+                            )
+                        ]
+                    )
+                ]
+            )
+        ]
+    )
 
     output_dierctory = tmp_path / "docs"
     
@@ -189,3 +187,144 @@ def test_generator_produces_correct_summary(tmp_path):
     assert "- Tests: 1" in content
     assert "- Disabled: 0" in content
     assert "- Tagged: 1" in content
+
+def test_generator_handles_nested_classes(tmp_path):
+    project = Project(
+        test_files=[
+            TestFile(
+                path="UserTest.java",
+                package="com.example.users",
+                classes=[
+                    TestClass(
+                        name="UserTest",
+                        display_name="User Management Tests",
+                        methods=[
+                            TestMethod(
+                                name="shouldCreateUser",
+                                display_name="Creates a new user",
+                                is_test=True,
+                                is_disabled=False,
+                                tags=["user-management"],
+                                location=SourceLocation(
+                                    path="UserTest.java",
+                                    line=14
+                                )
+                            ),
+                            TestMethod(
+                                name="setup",
+                                display_name="Sets up unit tests",
+                                is_test=False,
+                                tags=["user-management"],
+                                lifecycle="BeforeEach",
+                                is_disabled=False,
+                                location=SourceLocation(
+                                    path="UserTest.java",
+                                    line=32
+                                )
+                            )
+                        ],
+                        nested_classes=[
+                            TestClass(
+                                name="LoginTests",
+                                methods=[
+                                    TestMethod(
+                                        name="shouldLogin",
+                                        is_test=True
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                ]
+            )
+        ]
+    )
+
+    output_dierctory = tmp_path / "docs"
+    
+    MarkdownGenerator().generate(project, output_dierctory)
+
+    content = (
+        output_dierctory / "UserTest.md"
+    ).read_text()
+
+    assert "UserTest" in content
+    assert "LoginTests" in content
+    assert "shouldLogin" in content
+
+def test_generator_handles_nested_inner_classes(tmp_path):
+    project = Project(
+        test_files=[
+            TestFile(
+                path="UserTest.java",
+                package="com.example.users",
+                classes=[
+                    TestClass(
+                        name="UserTest",
+                        display_name="User Management Tests",
+                        methods=[
+                            TestMethod(
+                                name="shouldCreateUser",
+                                display_name="Creates a new user",
+                                is_test=True,
+                                is_disabled=False,
+                                tags=["user-management"],
+                                location=SourceLocation(
+                                    path="UserTest.java",
+                                    line=14
+                                )
+                            ),
+                            TestMethod(
+                                name="setup",
+                                display_name="Sets up unit tests",
+                                is_test=False,
+                                tags=["user-management"],
+                                lifecycle="BeforeEach",
+                                is_disabled=False,
+                                location=SourceLocation(
+                                    path="UserTest.java",
+                                    line=32
+                                )
+                            )
+                        ],
+                        nested_classes=[
+                            TestClass(
+                                name="LoginTests",
+                                methods=[
+                                    TestMethod(
+                                        name="shouldLogin",
+                                        is_test=True
+                                    )
+                                ],
+                                nested_classes=[
+                                    TestClass(
+                                        name="ValidationTests",
+                                        methods=[
+                                            TestMethod(
+                                                name="shouldValidate",
+                                                is_test=True
+                                            )
+                                        ]
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                ]
+            )
+        ]
+    )
+
+    output_dierctory = tmp_path / "docs"
+    
+    MarkdownGenerator().generate(project, output_dierctory)
+
+    content = (
+        output_dierctory / "UserTest.md"
+    ).read_text()
+
+    print(content)
+
+    assert "UserTest" in content
+    assert "LoginTests" in content
+    assert "shouldLogin" in content

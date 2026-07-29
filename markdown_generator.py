@@ -29,21 +29,29 @@ class MarkdownGenerator:
     def _create_documentation(self, test_file: TestFile, test_class: TestClass) -> ClassDocumentation:
         methods, summary = self._collect_methods(test_class)
 
+        nested = [
+            self._create_documentation(
+                test_file,
+                nested_class
+            ) for nested_class in test_class.nested_classes
+        ]
+
         return ClassDocumentation(
             title=self._get_title(test_class),
             class_name=test_class.name,
             package=self._get_package(test_file),
             summary=summary,
-            methods=methods
+            methods=methods,
+            nested_classes=nested
         )
 
     def _render(self, documentation: ClassDocumentation) -> str:
         lines = []
 
-        lines.extend(self._render_title(documentation.title, documentation.class_name))
+        lines.extend(self._render_class_title(documentation))
         lines.extend(self._render_package(documentation.package))
-        lines.extend(self._render_summary(documentation.summary))
-        lines.extend(self._render_methods(documentation.methods))
+
+        lines.extend(self._render_class_body(documentation, 2))
 
         return "\n".join(lines)
 
@@ -93,12 +101,12 @@ class MarkdownGenerator:
     def _get_package(self, test_file: TestFile) -> str:
         return test_file.package or "(default)"
 
-    def _render_title(self, title: str, class_name: str) -> list[str]:
+    def _render_class_title(self, documentation: ClassDocumentation, level: int = 1) -> list[str]:
         lines = []
 
-        lines.append(f"# {title}")
+        lines.append("#" * level + " " + documentation.title)
         lines.append("")
-        lines.append(f"**Class:** `{class_name}`")
+        lines.append(f"**Class:** `{documentation.class_name}`")
         lines.append("")
 
         return lines
@@ -113,25 +121,26 @@ class MarkdownGenerator:
 
         return lines
 
-    def _render_summary(self, summary: SummaryDocumentation) -> list[str]:
+    def _render_summary(self, summary: SummaryDocumentation, level:int = 2) -> list[str]:
         lines = []
 
-        lines.append(f"## Summary")
+        lines.append("#" * (level) + " Summary")
         lines.append("")
         lines.append(f"- Tests: {summary.tests}")
         lines.append(f"- Disabled: {summary.disabled}")
         lines.append(f"- Tagged: {summary.tagged}")
+        lines.append("")
 
         return lines
 
-    def _render_methods(self, methods: list[MethodDocumentation]) -> list[str]:
+    def _render_methods(self, methods: list[MethodDocumentation], level: int = 2) -> list[str]:
         lines = []
 
-        lines.append(f"## Test Methods")
+        lines.append("#" * (level) + " Test Methods")
         lines.append("")
 
         for method in methods:
-            lines.append(f"### {method.title}")
+            lines.append("#" * (level+1) + " " + str(method.title))
             lines.append("")
             lines.append(f"- Method: `{method.method_name}`")
             lines.append(f"- Tags: {", ".join(method.tags)}")
@@ -140,6 +149,21 @@ class MarkdownGenerator:
                 "Unknown" if method.location is None 
                 else method.location.path + ":" + str(method.location.line)}"
             )
+            lines.append("")
+
+        return lines
+
+    def _render_class_body(self, documentation: ClassDocumentation, level: int) -> list[str]:
+        lines = []
+
+        lines.extend(self._render_summary(documentation.summary, level))
+
+        lines.extend(self._render_methods(documentation.methods, level))
+
+        for nested in documentation.nested_classes:
+
+            lines.extend(self._render_class_title(nested, level))
+            lines.extend(self._render_class_body(nested, level+1))
 
         return lines
 

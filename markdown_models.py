@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-
 from models import SourceLocation
 
 @dataclass
@@ -23,4 +22,5 @@ class ClassDocumentation:
     package: str
     summary: SummaryDocumentation
     methods: list[MethodDocumentation]
+    nested_classes: list["ClassDocumentation"] = field(default_factory=list)
 
