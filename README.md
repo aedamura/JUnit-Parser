@@ -33,4 +33,3 @@ JUnit Parser/
     parser.py
     scanner.py
     parser.py
-    generators/
