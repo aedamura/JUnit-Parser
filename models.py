@@ -13,6 +13,9 @@ class TestMethod:
     tags: list[str] = field(default_factory=list)
     parameters: list[str] = field(default_factory=list)
     location: SourceLocation | None = None
+    is_test: bool = False
+    is_parameterized: bool = False
+    lifecycle: str | None = None
 
 @dataclass
 class TestClass:
