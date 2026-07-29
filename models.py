@@ -9,13 +9,18 @@ class SourceLocation:
 class TestMethod:
     name: str
     display_name: str | None = None
+
     annotations: list[str] = field(default_factory=list)
     tags: list[str] = field(default_factory=list)
-    parameters: list[str] = field(default_factory=list)
-    location: SourceLocation | None = None
+
+    method_parameters: list[str] = field(default_factory=list)
+    
     is_test: bool = False
     is_parameterized: bool = False
     lifecycle: str | None = None
+    is_disabled: bool = False
+
+    location: SourceLocation | None = None
 
 @dataclass
 class TestClass:

@@ -25,11 +25,19 @@ def test_analyzer_stores_lifecycle():
 
     analyzer = JUnitAnalyzer()
 
+    assert method_1.is_test is False
+    assert method_1.is_parameterized is False
+    assert method_1.is_disabled is False
+
     assert method_1.lifecycle is None
 
     analyzer._analyze_method(method_1)
 
     assert method_1.lifecycle == "BeforeEach"
+
+    assert method_1.is_test is False
+    assert method_1.is_parameterized is False
+    assert method_1.is_disabled is False
 
     assert method_2.lifecycle is None
 
@@ -37,31 +45,62 @@ def test_analyzer_stores_lifecycle():
 
     assert method_2.lifecycle == "AfterEach"
 
-def test_analyzer_identifies_test_methods():
-    method_1 = TestMethod(
+def test_analyzer_identifies_non_parameterized_test_methods():
+    method = TestMethod(
         name="testMethod",
         annotations=["Test"]
     )
 
-    method_2 = TestMethod(
-        name="testMethod2",
+    analyzer = JUnitAnalyzer()
+
+    assert not method.is_test
+    assert not method.is_parameterized
+    assert method.lifecycle is None
+    assert not method.is_disabled
+
+    analyzer._analyze_method(method)
+
+    assert method.is_test
+    assert not method.is_parameterized
+    assert method.lifecycle is None
+    assert not method.is_disabled
+
+def test_analyzer_identifies_parameterized_test_methods():
+    method = TestMethod(
+        name="testMethod",
         annotations=["ParameterizedTest"]
     )
 
     analyzer = JUnitAnalyzer()
 
-    assert not method_1.is_test
-    assert not method_1.is_parameterized
+    assert not method.is_test
+    assert not method.is_parameterized
+    assert method.lifecycle is None
+    assert not method.is_disabled
 
-    analyzer._analyze_method(method_1)
+    analyzer._analyze_method(method)
 
-    assert method_1.is_test
-    assert not method_1.is_parameterized
+    assert method.is_test
+    assert method.is_parameterized
+    assert method.lifecycle is None
+    assert not method.is_disabled
 
-    assert not method_2.is_test
-    assert not method_2.is_parameterized
+def test_analyzer_identifies_disabled_methods():
+    method = TestMethod(
+        name="testMethod",
+        annotations=["Disabled"]
+    )
 
-    analyzer._analyze_method(method_2)
+    analyzer = JUnitAnalyzer()
 
-    assert method_2.is_test
-    assert method_2.is_parameterized
+    assert not method.is_test
+    assert not method.is_parameterized
+    assert method.lifecycle is None
+    assert not method.is_disabled
+
+    analyzer._analyze_method(method)
+
+    assert method.is_disabled
+    assert not method.is_test
+    assert not method.is_parameterized
+    assert method.lifecycle is None

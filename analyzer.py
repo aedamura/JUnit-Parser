@@ -1,4 +1,5 @@
-from models import Project
+from models import Project, TestClass, TestMethod
+from annotations import TEST_ANNOTATIONS, LIFECYCLE_ANNOTATIONS
 
 class JUnitAnalyzer:
 
@@ -11,19 +12,21 @@ class JUnitAnalyzer:
 
         return project
 
-    def _analyze_class(self, test_class):
-        pass
+    def _analyze_class(self, test_class: TestClass):
+        for method in test_class.methods:
+            self._analyze_method(method)
 
-    def _analyze_method(self, test_method):
-        if "Test" in test_method.annotations:
-            test_method.is_test = True
+        for nested in test_class.nested_classes:
+            self._analyze_class(nested)
 
-        elif "ParameterizedTest" in test_method.annotations:
-            test_method.is_test = True
-            test_method.is_parameterized = True
+    def _analyze_method(self, test_method: TestMethod):
+        annotations = set(test_method.annotations)
 
-        elif "BeforeEach" in test_method.annotations:
-            test_method.lifecycle = "BeforeEach"
+        test_method.is_test = bool(annotations & TEST_ANNOTATIONS)
+        test_method.is_parameterized = "ParameterizedTest" in annotations
+        test_method.is_disabled = "Disabled" in annotations
 
-        elif "AfterEach" in test_method.annotations:
-            test_method.lifecycle = "AfterEach"
+        for lifecycle in LIFECYCLE_ANNOTATIONS:
+            if lifecycle in annotations:
+                test_method.lifecycle = lifecycle
+                break
