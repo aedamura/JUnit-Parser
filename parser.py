@@ -52,3 +52,21 @@ class JavaParser:
     def _parse_annotations(self, method_node, target: TestMethod):
         for annotation in method_node.annotations:
             target.annotations.append(annotation.name)
+
+            if annotation.name == "Tag":
+                value = self._get_annotation_value(annotation)
+
+                if value:
+                    target.tags.append(value)
+
+            elif annotation.name == "DisplayName":
+                value = self._get_annotation_value(annotation)
+
+                if value:
+                    target.display_name = value
+
+    def _get_annotation_value(self, annotation):
+        if annotation.element is None:
+            return None
+
+        return annotation.element.value.strip('"')
