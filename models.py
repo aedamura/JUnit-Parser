@@ -42,3 +42,5 @@ class TestFile:
 @dataclass
 class Project:
     test_files: list[TestFile] = field(default_factory=list)
+
+    class_index: dict[str, TestClass] = field(default_factory=dict)

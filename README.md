@@ -24,8 +24,10 @@ python main.py
 
 ## Project Structure
 
-test_atlas/
+JUnit Parser/
+    analyzer.py
+    annotations.py
+    indexer.py
     models.py
-    scanner.py
     parser.py
-    generators/
+    scanner.py
