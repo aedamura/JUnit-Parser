@@ -129,6 +129,21 @@ def test_parser_reads_nested_classes(tmp_path):
                 @Test
                 void shouldLoginSuccessfully() {
                 }
+
+                @Nested
+                class InvalidLoginTests {
+
+                    @Test
+                    void shouldFailWithInvalidCredentials() {
+                    }
+                }
+            }
+
+            class RegistrationTests {
+
+                @Test
+                void shouldRegisterSuccessfully() {
+                }
             }
         }
         """
@@ -142,16 +157,23 @@ def test_parser_reads_nested_classes(tmp_path):
 
     result = parser.parse(test_file)
 
+    assert len(result.classes) == 1
+    assert result.classes[0].name == "UserTest"
+
     root = result.classes[0]
 
-    assert root.name == "UserTest"
-
+    print(f"Root class: {root.name}, Nested classes: {[cls.name for cls in root.nested_classes]}")
     assert len(root.nested_classes) == 1
-
     nested = root.nested_classes[0]
-
     assert nested.name == "LoginTests"
-
+    assert nested.annotations == ["Nested"]
     assert len(nested.methods) == 1
-
     assert nested.methods[0].name == "shouldLoginSuccessfully"
+
+
+    assert len(nested.nested_classes) == 1
+    sub_nested = nested.nested_classes[0]
+    assert sub_nested.name == "InvalidLoginTests" 
+    assert sub_nested.annotations == ["Nested"]
+    assert len(sub_nested.methods) == 1
+    assert sub_nested.methods[0].name == "shouldFailWithInvalidCredentials"

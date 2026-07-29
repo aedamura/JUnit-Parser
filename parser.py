@@ -37,17 +37,18 @@ class JavaParser:
             if isinstance(type_decl, ClassDeclaration):
                 test_class = self._create_test_class(type_decl)
 
-                self._parse_nested_classes(type_decl, test_class)
-
                 test_file.classes.append(test_class)
 
     def _parse_nested_classes(self, node, test_class: TestClass):
 
         for nested in node.body:
             if isinstance(nested, ClassDeclaration):
-                nested_class = self._create_test_class(nested)
 
-                test_class.nested_classes.append(nested_class)
+                if self._has_annotation(nested, "Nested"):
+
+                    nested_class = self._create_test_class(nested)
+
+                    test_class.nested_classes.append(nested_class)
 
     def _parse_methods(self, class_node, test_class: TestClass):
 
@@ -83,5 +84,12 @@ class JavaParser:
 
         self._parse_annotations(node, test_class)
         self._parse_methods(node, test_class)
+        self._parse_nested_classes(node, test_class)
 
         return test_class
+
+    def _has_annotation(self, node, annotation_name: str) -> bool:
+        return any(
+            annotation.name == annotation_name
+            for annotation in node.annotations
+        )
