@@ -44,23 +44,114 @@ def test_parser_reads_package_and_class(tmp_path):
 
     result = parser.parse(test_file)
 
+    # --------
+    # Package assertions
+    # --------
+
     assert result.package == "com.example.users"
+
+    # --------
+    # Imports assertions
+    # --------
+
+    assert len(result.imports) == 3
     assert result.imports == [
-        "org.junit.jupiter.api.Test"
+        "org.junit.jupiter.api.Test",
+        "org.junit.jupiter.api.Tag",     
+        "org.junit.jupiter.api.DisplayName"   
     ]
+
+    # --------
+    # Class assertions
+    # --------
+
     assert len(result.classes) == 1
     assert result.classes[0].name == "UserTest"
+    assert result.classes[0].display_name == "User Management Tests"
+    assert result.classes[0].annotations == ["DisplayName"]
+    assert result.classes[0].tags == []
+    
+
+def test_parser_reads_methods_with_annotations(tmp_path):
+
+    java_file = tmp_path / "UserTest.java"
+
+    java_file.write_text(
+        """
+        package com.example.users;
+
+        import org.junit.jupiter.api.Test;
+        import org.junit.jupiter.api.Tag;
+        import org.junit.jupiter.api.DisplayName;
+
+        class UserTest {
+
+            @Test
+            @Tag("user-management")
+            @DisplayName("Creates a new user")
+            void shouldCreateUser() {
+            }
+        }
+        """
+    )
+
+    test_file = SourceTestFile(
+        path=str(java_file)
+    )
+
+    parser = JavaParser()
+
+    result = parser.parse(test_file)
 
     assert len(result.classes) == 1
+    assert result.classes[0].name == "UserTest"
+    assert len(result.classes[0].methods) == 1
+    assert result.classes[0].methods[0].name == "shouldCreateUser"
+    assert result.classes[0].methods[0].annotations == ["Test", "Tag", "DisplayName"]
+    assert result.classes[0].methods[0].tags == ["user-management"]
 
-    test_class = result.classes[0]
+def test_parser_reads_nested_classes(tmp_path):
 
-    assert test_class.name == "UserTest"
-    assert test_class.display_name == "User Management Tests"
+    java_file = tmp_path / "UserTest.java"
 
-    assert len(test_class.methods) == 1
+    java_file.write_text(
+        """
+        package com.example.users;
 
-    method = test_class.methods[0]
+        import org.junit.jupiter.api.Nested;
+        import org.junit.jupiter.api.Test;
 
-    assert method.display_name == "Creates a new user"
-    assert method.tags == ["user-management"]
+        class UserTest {
+
+            @Nested
+            class LoginTests {
+
+                @Test
+                void shouldLoginSuccessfully() {
+                }
+            }
+        }
+        """
+    )
+
+    test_file = SourceTestFile(
+        path=str(java_file)
+    )
+
+    parser = JavaParser()
+
+    result = parser.parse(test_file)
+
+    root = result.classes[0]
+
+    assert root.name == "UserTest"
+
+    assert len(root.nested_classes) == 1
+
+    nested = root.nested_classes[0]
+
+    assert nested.name == "LoginTests"
+
+    assert len(nested.methods) == 1
+
+    assert nested.methods[0].name == "shouldLoginSuccessfully"
