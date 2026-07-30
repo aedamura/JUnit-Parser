@@ -323,8 +323,98 @@ def test_generator_handles_nested_inner_classes(tmp_path):
         output_dierctory / "UserTest.md"
     ).read_text()
 
-    print(content)
-
     assert "UserTest" in content
     assert "LoginTests" in content
     assert "shouldLogin" in content
+
+def test_generator_creates_index_file(tmp_path):
+
+    project = Project(
+        test_files=[
+            TestFile(
+                path="UserTests.java",
+                package="com.example.users",
+                classes=[
+                    TestClass(
+                        name="UserTests",
+                        methods=[
+                            TestMethod(
+                                name="shouldLogin",
+                                is_test=True,
+                            ),
+                            TestMethod(
+                                name="shouldDelete",
+                                is_test=True,
+                                is_disabled=True,
+                            ),
+                        ],
+                        nested_classes=[
+                            TestClass(
+                                name="LoginTests",
+                                methods=[
+                                    TestMethod(
+                                        name="shouldValidatePassword",
+                                        is_test=True,
+                                    )
+                                ]
+                            )
+                        ],
+                    )
+                ],
+            ),
+            TestFile(
+                path="OrderTests.java",
+                package="com.example.orders",
+                classes=[
+                    TestClass(
+                        name="OrderTests",
+                        methods=[
+                            TestMethod(
+                                name="shouldCreateOrder",
+                                is_test=True,
+                            )
+                        ],
+                    )
+                ],
+            ),
+        ]
+    )
+
+    output_dir = tmp_path / "docs"
+
+    generator = MarkdownGenerator()
+
+    generator.generate(project, output_dir)
+
+    index = output_dir / "index.md"
+
+    assert index.exists()
+
+    content = index.read_text()
+
+    print(content)
+
+    # ------------------------
+    # Project Summary
+    # ------------------------
+
+    assert "# JUnit Test Documentation" in content
+
+    assert "Package Count: 2" in content
+    assert "Test Files: 2" in content
+    assert "Test Classes: 3" in content
+    assert "Test Methods: 4" in content
+    assert "Disabled Tests: 1" in content
+
+    # ------------------------
+    # Packages
+    # ------------------------
+
+    assert "## Packages" in content
+
+    assert "### com.example.users" in content
+    assert "[UserTests](UserTests.md)" in content
+    assert "LoginTests" in content
+
+    assert "### com.example.orders" in content
+    assert "[OrderTests](OrderTests.md)" in content
