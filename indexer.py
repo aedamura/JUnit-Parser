@@ -1,9 +1,9 @@
 from models import Project, TestClass
 
 
-class ProjectIndexer:
+class Indexer:
 
-    def run(self, project: Project) -> Project:
+    def index(self, project: Project) -> Project:
 
         project.class_index.clear()
 

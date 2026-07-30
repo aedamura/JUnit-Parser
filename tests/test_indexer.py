@@ -6,7 +6,7 @@ parent_dir = os.path.dirname(current_dir)
 
 sys.path.append(parent_dir)
 
-from indexer import ProjectIndexer
+from indexer import Indexer
 from models import Project, TestClass, TestFile
 
 
@@ -30,8 +30,8 @@ def test_indexer():
         ]
     )
 
-    indexer = ProjectIndexer()
-    indexer.run(project)
+    indexer = Indexer()
+    indexer.index(project)
 
     assert (
         "com.example.users.UserTest"
