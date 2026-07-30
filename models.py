@@ -6,6 +6,12 @@ class SourceLocation:
     line: int
 
 @dataclass
+class Field:
+    name: str
+    type: str
+    location: SourceLocation
+
+@dataclass
 class TestMethod:
     name: str
     display_name: str | None = None
@@ -26,10 +32,16 @@ class TestMethod:
 class TestClass:
     name: str
     display_name: str | None = None
+
     annotations: list[str] = field(default_factory=list)
     tags: list[str] = field(default_factory=list)
+
+    fields: list[Field] = field(default_factory=list)
+
     methods: list[TestMethod] = field(default_factory=list)
+
     nested_classes: list["TestClass"] = field(default_factory=list)
+
     location: SourceLocation | None = None
 
 @dataclass

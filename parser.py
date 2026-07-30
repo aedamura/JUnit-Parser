@@ -6,7 +6,7 @@ from annotations import (
     is_lifecycle_annotation,
     is_meta_annotation
 )
-from models import SourceLocation, TestClass, TestFile, TestMethod
+from models import SourceLocation, TestClass, TestFile, TestMethod, Field
 
 class JavaParser:
 
@@ -46,12 +46,12 @@ class JavaParser:
                 nested_class = self._create_test_class(nested, file_path)
                 test_class.nested_classes.append(nested_class)
 
-    def _parse_methods(self, class_node, test_class: TestClass, path: str):
+    def _parse_methods(self, class_node, test_class: TestClass, file_path: str):
 
         for method in class_node.methods:
             test_method = TestMethod(
                 name=method.name,
-                location= self._create_location(method, path)
+                location= self._create_location(method, file_path)
             )
 
             self._parse_annotations(method, test_method)
@@ -76,6 +76,21 @@ class JavaParser:
 
         return annotation.element.value.strip('"')
 
+    def _parse_fields(self, class_node, test_class: TestClass, file_path: str):
+        for field in class_node.fields:
+
+            field_type = field.type.name
+
+            for declarator in field.declarators:
+
+                test_class.fields.append(
+                    Field(
+                        name=declarator.name,
+                        type=field_type,
+                        location= self._create_location(field, file_path)
+                    )
+                )
+
     def _create_test_class(self, node, file_path: str) -> TestClass:
         test_class = TestClass(
             name=node.name,
@@ -83,6 +98,7 @@ class JavaParser:
         )
 
         self._parse_annotations(node, test_class)
+        self._parse_fields(node, test_class, file_path)
         self._parse_methods(node, test_class, file_path)
         self._parse_nested_classes(node, file_path, test_class)
 

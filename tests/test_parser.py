@@ -29,6 +29,10 @@ FILE_CONTENTS = dedent("""\
     @Tag("feature")
     class UserTest {
 
+        private UserService service;
+        
+        private UserRepository repository;
+
         @DisplayName("User Login Tests")
         @Nested
         @Tag("login")
@@ -63,6 +67,8 @@ FILE_CONTENTS = dedent("""\
         @Nested
         @Tag("registration")
         class RegistrationTests {
+
+            private RegistrationID identifier;
 
             @DisplayName("User registers correctly")
             @ParameterizedTest
@@ -232,8 +238,29 @@ def test_parser_captures_class_location(tmp_path):
     cls = _get_class("LoginTests", result.classes)
 
     assert cls.location
-    assert cls.location.line == 19
+    assert cls.location.line == 23
 
+def test_parser_reads_class_fields(tmp_path):
+    result = _initialize_result(tmp_path)
+    cls = _get_class("UserTest", result.classes)
+
+    assert len(cls.fields) == 2
+
+    assert cls.fields[0].name == "service"
+    assert cls.fields[0].type == "UserService"
+    assert cls.fields[0].location.line == 15
+
+    assert cls.fields[1].name == "repository"
+    assert cls.fields[1].type == "UserRepository"
+    assert cls.fields[1].location.line == 17
+
+    cls = _get_class("RegistrationTests", result.classes)
+
+    assert len(cls.fields) == 1
+
+    assert cls.fields[0].name == "identifier"
+    assert cls.fields[0].type == "RegistrationID"
+    assert cls.fields[0].location.line == 54
 
 # ----------
 # Test Class Level Parsing
@@ -268,4 +295,5 @@ def test_parser_captures_method_location(tmp_path):
     method = _get_method("initializeCredentials", cls)
 
     assert method.location
-    assert method.location.line == 70
+    assert method.location.line == 76
+
