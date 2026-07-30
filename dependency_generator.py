@@ -1,9 +1,19 @@
+from pathlib import Path
+
 from dependency_model import DependencyGraph
 
 
 class DependencyGraphGenerator:
 
-    def generate(self, graph: DependencyGraph) -> str:
+    def generate(self, graph: DependencyGraph, output_dir: Path):
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        markdown = self._render(graph)
+
+        self._write(output_dir, markdown)
+
+
+    def _render(self, graph: DependencyGraph) -> str:
         lines = []
 
         lines.append("# Dependency Graph")
@@ -24,3 +34,8 @@ class DependencyGraphGenerator:
         lines.append("```")
 
         return "\n".join(lines)
+
+    def _write(self, output_dir: Path, markdown: str):
+        output_path = output_dir / "dependency_graph.md"
+
+        output_path.write_text(markdown, encoding="utf-8")

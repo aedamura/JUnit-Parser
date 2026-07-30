@@ -12,3 +12,10 @@ class DependencyGraph:
     def add_dependency(self, dependency: Dependency):
         if dependency not in self.dependencies:
             self.dependencies.append(dependency)
+    
+    def dependencies_for(self, source: str) -> list[Dependency]:
+        return [
+            dependency
+            for dependency in self.dependencies
+            if dependency.source == source
+        ]
