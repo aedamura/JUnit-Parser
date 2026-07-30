@@ -14,7 +14,7 @@ class DependencyGraphGenerator:
         lines.append("graph TD")
         lines.append("")
 
-        for dependency in graph.dependencies:
+        for dependency in sorted(graph.dependencies, key=lambda d: (d.source, d.target)):
             source = dependency.source.split(".")[-1]
             target = dependency.target.split(".")[-1]
 
