@@ -14,15 +14,12 @@ class Pipeline:
         self._indexer = indexer
 
     def run(self, input_directory: Path) -> Project:
-        project = self._scanner.scan(input_directory.name)
+        project = self._scanner.scan(input_directory)
 
-        parsed_files = []
 
         for test_file in project.test_files:
-            parsed_files.append(self._parser.parse(test_file))
+           self._parser.parse(test_file)
 
-        project.test_files = parsed_files
-        
         project = self._indexer.index(project)
 
         return project

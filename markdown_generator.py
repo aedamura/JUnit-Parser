@@ -106,8 +106,6 @@ class MarkdownGenerator:
 
         output_path.write_text("\n".join(lines), encoding="utf-8")
 
-
-
     def _collect_methods(self, test_class: TestClass) -> tuple[list[MethodDocumentation], SummaryDocumentation]:
 
         methods = []
@@ -225,7 +223,7 @@ class MarkdownGenerator:
         return len({
             test_file.package
             for test_file in project.test_files
-            if test_file.package is not "(default)"
+            if test_file.package != "(default)"
         })
 
     def _count_classes_from_files(self, files: list[TestFile]) -> int:

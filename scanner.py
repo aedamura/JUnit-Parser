@@ -3,12 +3,10 @@ from models import Project, TestFile
 
 class FileScanner:
 
-    def scan(self, root_path: str) -> Project:
+    def scan(self, root_path: Path) -> Project:
         project = Project()
 
-        root = Path(root_path)
-
-        for file in root.rglob("*Test*.java"):
+        for file in root_path.rglob("*.java"):
             if self._is_test_file(file):
                 project.test_files.append(
                     TestFile(
