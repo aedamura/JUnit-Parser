@@ -76,13 +76,63 @@ def test_dependency_analyzer_ignores_java_imports(tmp_path):
 
     graph = _build_graph(java_file)
 
-    print(graph)
-
     assert len(graph.dependencies) == 1
     assert not any(
         dependency.source.startswith("java." or "javax.")
         for dependency in graph.dependencies
     )
 
+def test_dependency_analyzer_captures_fields(tmp_path):
+    java_file = tmp_path / "UserTest.java"
 
+    java_file.write_text(dedent("""\
+        package com.example.users;
 
+        class UserTest{
+            private User user;
+            private Register register;
+        }
+    """))
+
+    graph = _build_graph(java_file)
+
+    assert len(graph.dependencies) == 2
+    assert any(
+        dependency.target == "User"
+        for dependency in graph.dependencies
+    )
+
+    assert any(
+        dependency.target == "Register"
+        for dependency in graph.dependencies
+    )
+
+def test_source_and_target_are_properly_labeled(tmp_path):
+    java_file = tmp_path / "UserTest.java"
+
+    java_file.write_text(dedent("""\
+        package com.example.users;
+
+        import com.example.UserService;
+
+        class UserTest{
+            private User user;
+        }
+    """))
+
+    graph = _build_graph(java_file)
+
+    assert len(graph.dependencies) == 2
+
+    assert all(
+       dependency.source == "com.example.users.UserTest"
+       for dependency in graph.dependencies 
+    )
+    assert any(
+        dependency.target == "com.example.UserService"
+        for dependency in graph.dependencies
+    )  
+    assert any(
+        dependency.target == "User"
+        for dependency in graph.dependencies
+    )

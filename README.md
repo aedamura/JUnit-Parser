@@ -28,6 +28,9 @@ python main.py
 JUnit Parser/
     analyzer.py
     annotations.py
+    dependency_analyzer.py
+    dependency_generator.py
+    dependency_model.py
     indexer.py
     markdown_generator.py
     markdown_models.py
