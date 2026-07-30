@@ -12,6 +12,11 @@ class Field:
     location: SourceLocation
 
 @dataclass
+class Constructor:
+    parameters: list[str] = field(default_factory=list)
+    location: SourceLocation | None = None
+
+@dataclass
 class TestMethod:
     name: str
     display_name: str | None = None
@@ -37,6 +42,7 @@ class TestClass:
     tags: list[str] = field(default_factory=list)
 
     fields: list[Field] = field(default_factory=list)
+    constructors: list[Constructor] = field(default_factory=list)
 
     methods: list[TestMethod] = field(default_factory=list)
 

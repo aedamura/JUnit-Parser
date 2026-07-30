@@ -30,8 +30,10 @@ FILE_CONTENTS = dedent("""\
     class UserTest {
 
         private UserService service;
-        
         private UserRepository repository;
+
+        UserTest(UserService service, UserRepository repository){
+        }
 
         @DisplayName("User Login Tests")
         @Nested
@@ -238,7 +240,7 @@ def test_parser_captures_class_location(tmp_path):
     cls = _get_class("LoginTests", result.classes)
 
     assert cls.location
-    assert cls.location.line == 23
+    assert cls.location.line == 25
 
 def test_parser_reads_class_fields(tmp_path):
     result = _initialize_result(tmp_path)
@@ -252,7 +254,7 @@ def test_parser_reads_class_fields(tmp_path):
 
     assert cls.fields[1].name == "repository"
     assert cls.fields[1].type == "UserRepository"
-    assert cls.fields[1].location.line == 17
+    assert cls.fields[1].location.line == 16
 
     cls = _get_class("RegistrationTests", result.classes)
 
@@ -260,7 +262,21 @@ def test_parser_reads_class_fields(tmp_path):
 
     assert cls.fields[0].name == "identifier"
     assert cls.fields[0].type == "RegistrationID"
-    assert cls.fields[0].location.line == 54
+    assert cls.fields[0].location.line == 56
+
+def test_parser_captures_constructors(tmp_path):
+    result = _initialize_result(tmp_path)
+    cls = _get_class("UserTest", result.classes)
+
+    assert len(cls.constructors) == 1
+    constructor = cls.constructors[0]
+
+    assert constructor.parameters == [
+        "UserService",
+        "UserRepository"
+    ]
+    assert constructor.location
+    assert constructor.location.line == 18
 
 # ----------
 # Test Class Level Parsing
@@ -295,5 +311,5 @@ def test_parser_captures_method_location(tmp_path):
     method = _get_method("initializeCredentials", cls)
 
     assert method.location
-    assert method.location.line == 76
+    assert method.location.line == 78
 

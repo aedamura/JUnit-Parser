@@ -6,7 +6,7 @@ from annotations import (
     is_lifecycle_annotation,
     is_meta_annotation
 )
-from models import SourceLocation, TestClass, TestFile, TestMethod, Field
+from models import Constructor, SourceLocation, TestClass, TestFile, TestMethod, Field
 
 class JavaParser:
 
@@ -21,6 +21,10 @@ class JavaParser:
         self._parse_classes(tree, test_file)
 
         return test_file
+
+    # ----------
+    # FILE LEVEL PARSERS
+    # ----------
 
     def _parse_package(self, tree, test_file: TestFile):
         if tree.package:
@@ -38,6 +42,10 @@ class JavaParser:
                 test_class = self._create_test_class(type_decl, test_file.path)
 
                 test_file.classes.append(test_class)
+
+    # ----------
+    # CLASS LEVEL PARSERS
+    # ----------
 
     def _parse_nested_classes(self, node, file_path, test_class: TestClass):
 
@@ -70,12 +78,6 @@ class JavaParser:
             elif annotation.name == "DisplayName" and value:
                 target.display_name = value
 
-    def _get_annotation_value(self, annotation):
-        if annotation.element is None:
-            return None
-
-        return annotation.element.value.strip('"')
-
     def _parse_fields(self, class_node, test_class: TestClass, file_path: str):
         for field in class_node.fields:
 
@@ -91,6 +93,29 @@ class JavaParser:
                     )
                 )
 
+    def _parse_constructors(self, class_node, test_class: TestClass, file_path: str):
+        for constructor in class_node.constructors:
+            params = []
+
+            for param in constructor.parameters:
+
+                params.append(
+                    param.type.name
+                )
+
+            test_class.constructors.append(
+                Constructor(
+                    parameters = params,
+                    location = self._create_location(constructor, file_path)
+                )
+            )
+
+
+
+    # ----------
+    # OBJECT CONSTRUCTORS
+    # ----------
+
     def _create_test_class(self, node, file_path: str) -> TestClass:
         test_class = TestClass(
             name=node.name,
@@ -99,19 +124,30 @@ class JavaParser:
 
         self._parse_annotations(node, test_class)
         self._parse_fields(node, test_class, file_path)
+        self._parse_constructors(node, test_class, file_path)
         self._parse_methods(node, test_class, file_path)
         self._parse_nested_classes(node, file_path, test_class)
 
         return test_class
-
-    def _has_annotation(self, node, annotation_name: str) -> bool:
-        return any(
-            annotation.name == annotation_name
-            for annotation in node.annotations
-        )
 
     def _create_location(self, node, file_path: str) -> SourceLocation:
         return SourceLocation(
             path=file_path,
             line=node.position.line
         )
+
+    # ----------
+    # MISC HELPER FUNCTIONS
+    # ----------
+    
+    def _has_annotation(self, node, annotation_name: str) -> bool:
+        return any(
+            annotation.name == annotation_name
+            for annotation in node.annotations
+        )
+
+    def _get_annotation_value(self, annotation):
+        if annotation.element is None:
+            return None
+
+        return annotation.element.value.strip('"')
