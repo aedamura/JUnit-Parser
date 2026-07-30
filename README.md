@@ -36,6 +36,7 @@ JUnit Parser/
     markdown_models.py
     models.py
     parser.py
+    pipeline.py
     scanner.py
     version.py
 ```
