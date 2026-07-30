@@ -145,7 +145,7 @@ class MarkdownGenerator:
         return test_class.name
 
     def _get_package(self, test_file: TestFile) -> str:
-        return test_file.package or "(default)"
+        return test_file.package
 
     # -----------------
     # Render Functions
@@ -225,7 +225,7 @@ class MarkdownGenerator:
         return len({
             test_file.package
             for test_file in project.test_files
-            if test_file.package
+            if test_file.package is not "(default)"
         })
 
     def _count_classes_from_files(self, files: list[TestFile]) -> int:
@@ -300,7 +300,7 @@ class MarkdownGenerator:
         packages = {}
 
         for file in files:
-            package = file.package or "(default)"
+            package = file.package
             package_entries = []
 
             packages.setdefault(package, package_entries)

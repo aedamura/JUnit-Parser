@@ -35,7 +35,7 @@ class TestClass:
 @dataclass
 class TestFile:
     path: str
-    package: str | None = None
+    package: str = "(default)"
     imports: list[str] = field(default_factory=list)
     classes: list[TestClass] = field(default_factory=list)
 
