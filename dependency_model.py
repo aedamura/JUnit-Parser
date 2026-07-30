@@ -11,4 +11,4 @@ class DependencyGraph:
 
     def add_dependency(self, dependency: Dependency):
         if dependency not in self.dependencies:
-            self.add_dependency(dependency)
+            self.dependencies.append(dependency)
