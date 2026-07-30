@@ -8,3 +8,7 @@ class Dependency:
 @dataclass
 class DependencyGraph:
     dependencies: list[Dependency] = field(default_factory=list)
+
+    def add_dependency(self, dependency: Dependency):
+        if dependency not in self.dependencies:
+            self.add_dependency(dependency)

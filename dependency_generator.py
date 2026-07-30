@@ -8,6 +8,8 @@ class DependencyGraphGenerator:
 
         lines.append("# Dependency Graph")
         lines.append("")
+        lines.append("This graph shows dependencies from JUnit test classes to imported production classes.")
+        lines.append("")
         lines.append("```mermaid")
         lines.append("graph TD")
         lines.append("")

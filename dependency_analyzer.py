@@ -19,21 +19,16 @@ class DependencyAnalyzer:
         for import_name in test_file.imports:
             if self._is_dependency(import_name):
 
-                graph.dependencies.append(
-                    Dependency(source=source, target=import_name)
-                )
+                graph.add_dependency(Dependency(source=source, target=import_name))
 
             for nested in test_class.nested_classes:
                 self._analyze_class(test_file, nested, graph)
 
     def _is_dependency(self, import_name: str) -> bool:
-        ignored = [
-            "org.junit.",
+        ignored_prefixes = (
             "java.",
-            "javax."
-        ]
-
-        return not any(
-            import_name.startswith(prefix)
-            for prefix in ignored
+            "javax.",
+            "org.junit",
         )
+
+        return not import_name.startswith(ignored_prefixes)
