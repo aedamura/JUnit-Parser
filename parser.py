@@ -39,7 +39,7 @@ class JavaParser:
     def _parse_classes(self, tree, test_file: TestFile):
         for type_decl in tree.types:
             if isinstance(type_decl, ClassDeclaration):
-                test_class = self._create_test_class(type_decl, test_file.path)
+                test_class = self._create_test_class(type_decl, test_file.path, [test_file.package])
 
                 test_file.classes.append(test_class)
 
@@ -47,11 +47,11 @@ class JavaParser:
     # CLASS LEVEL PARSERS
     # ----------
 
-    def _parse_nested_classes(self, node, file_path, test_class: TestClass):
+    def _parse_nested_classes(self, node, file_path, test_class: TestClass, parent_path: list[str]):
 
         for nested in node.body:
             if isinstance(nested, ClassDeclaration) and self._has_annotation(nested, "Nested"):
-                nested_class = self._create_test_class(nested, file_path)
+                nested_class = self._create_test_class(nested, file_path, parent_path)
                 test_class.nested_classes.append(nested_class)
 
     def _parse_methods(self, class_node, test_class: TestClass, file_path: str):
@@ -116,17 +116,20 @@ class JavaParser:
     # OBJECT CONSTRUCTORS
     # ----------
 
-    def _create_test_class(self, node, file_path: str) -> TestClass:
+    def _create_test_class(self, node, file_path: str, parent_path: list[str]) -> TestClass:
         test_class = TestClass(
             name=node.name,
+            qualified_name=_qualified_name(None, parent_path, node.name),
             location= self._create_location(node, file_path)
         )
+
+        parent_path.append(node.name)
 
         self._parse_annotations(node, test_class)
         self._parse_fields(node, test_class, file_path)
         self._parse_constructors(node, test_class, file_path)
         self._parse_methods(node, test_class, file_path)
-        self._parse_nested_classes(node, file_path, test_class)
+        self._parse_nested_classes(node, file_path, test_class, parent_path)
 
         return test_class
 
@@ -151,3 +154,16 @@ class JavaParser:
             return None
 
         return annotation.element.value.strip('"')
+
+def _qualified_name(
+    package: str | None,
+    enclosing_classes: list[str],
+    class_name: str,
+) -> str:
+    msg = f"{package}." if package else ""
+
+    for cls in enclosing_classes:
+        msg += f"{cls}."
+    msg += class_name
+
+    return msg

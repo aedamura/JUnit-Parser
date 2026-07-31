@@ -9,7 +9,7 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
 from dependency_analyzer import DependencyAnalyzer
-from dependency_model import DependencyGraph
+from dependency_model import DependencyGraph, Dependency
 from models import Project, TestFile as SourceTestFile
 from parser import JavaParser
 
@@ -136,3 +136,16 @@ def test_source_and_target_are_properly_labeled(tmp_path):
         dependency.target == "User"
         for dependency in graph.dependencies
     )
+
+def test_dependency_model_functions():
+    graph = DependencyGraph([
+        Dependency(
+            source="com.example.users.UserTest",
+            target="com.example.User"
+        )
+    ])
+
+    dp = graph.dependencies_for("com.example.users.UserTest")
+
+    assert len(dp) == 1
+    assert dp[0].target == "com.example.User"

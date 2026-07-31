@@ -36,6 +36,7 @@ class TestMethod:
 @dataclass
 class TestClass:
     name: str
+    qualified_name: str 
     display_name: str | None = None
 
     annotations: list[str] = field(default_factory=list)

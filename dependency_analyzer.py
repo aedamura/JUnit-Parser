@@ -19,16 +19,16 @@ class DependencyAnalyzer:
             if self._is_dependency(import_name):
                 graph.add_dependency(
                     Dependency(
-                        source=self._qualified_name(test_file, test_file.classes[0]),
+                        source=test_file.classes[0].qualified_name,
                         target=import_name
                     )
                 )
 
         for cls in test_file.classes:
-            self._analyze_class(test_file, cls, lookup_table, graph)
+            self._analyze_class(cls, lookup_table, graph)
 
-    def _analyze_class(self, test_file: TestFile, test_class: TestClass, lookup_table: dict[str,str], graph: DependencyGraph):
-        source = self._qualified_name(test_file, test_class)
+    def _analyze_class(self, test_class: TestClass, lookup_table: dict[str,str], graph: DependencyGraph):
+        source = test_class.qualified_name
 
         for field in test_class.fields:
             target = self._resolve_type(field.type, lookup_table)
@@ -37,7 +37,7 @@ class DependencyAnalyzer:
                 graph.add_dependency(Dependency(source=source, target=target))
 
         for nested in test_class.nested_classes:
-            self._analyze_class(test_file, nested, lookup_table, graph)
+            self._analyze_class(nested, lookup_table, graph)
 
     def _build_lookup_table(self, test_file: TestFile) -> dict[str, str]:
         lookup = {}
@@ -60,9 +60,3 @@ class DependencyAnalyzer:
         )
 
         return not import_name.startswith(ignored_prefixes)
-
-    def _qualified_name(self, test_file: TestFile, test_class: TestClass) -> str:
-        if test_file.package:
-            return f"{test_file.package}.{test_class.name}"
-
-        return test_class.name
