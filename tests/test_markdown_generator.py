@@ -323,6 +323,8 @@ def test_generator_handles_nested_inner_classes(tmp_path):
         output_dierctory / "UserTest.md"
     ).read_text()
 
+    print(content)
+
     assert "UserTest" in content
     assert "LoginTests" in content
     assert "shouldLogin" in content
@@ -413,8 +415,8 @@ def test_generator_creates_index_file(tmp_path):
     assert "## Packages" in content
 
     assert "### com.example.users" in content
-    assert "[UserTests](UserTests.md)" in content
-    assert "LoginTests" in content
+    assert "- [UserTests](UserTests.md)" in content
+    assert "- [LoginTests](UserTests.md)" in content
 
     assert "### com.example.orders" in content
-    assert "[OrderTests](OrderTests.md)" in content
+    assert "- [OrderTests](OrderTests.md)" in content

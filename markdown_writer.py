@@ -10,8 +10,8 @@ class MarkdownWriter:
     def line(self, text):
         self._lines.append(str(text))
 
-    def bullet(self, text, indents: int=0):
-        self._lines.append("  "*indents + "- " + str(text))
+    def bullet(self, text, indents: int=0, ordered_number: int = 0):
+        self._lines.append("    "*indents +  f"{"-" if ordered_number == 0 else str(abs(ordered_number))+"."} " + str(text))
 
     def code_block(self, language: str, text):
         self._lines.append(f"```{language}")
