@@ -34,6 +34,7 @@ JUnit Parser/
     indexer.py
     markdown_generator.py
     markdown_models.py
+    markdown_writer.py
     models.py
     parser.py
     pipeline.py
