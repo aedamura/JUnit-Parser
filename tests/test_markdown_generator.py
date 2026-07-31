@@ -441,17 +441,17 @@ def test_generator_creates_dependencies(tmp_path):
                 classes=[
                     TestClass(
                         name="UserTest",
-                        qualified_name="com.example.users.Users",
+                        qualified_name="com.example.users.UserTest",
                         fields=[
                             Field(
                                 name="user",
                                 type="User",
-                                location=SourceLocation("UserTests.java", 13)
+                                location=SourceLocation("UserTest.java", 13)
                             ),
                             Field(
                                 name="repository",
                                 type="UserRepository",
-                                location=SourceLocation("UserTests.java", 13)
+                                location=SourceLocation("UserTest.java", 13)
                             )
                         ],
                         methods=[
@@ -480,6 +480,17 @@ def test_generator_creates_dependencies(tmp_path):
     #print(content)
     
     assert "## Dependencies" in content
+
+    assert "### List" in content
     assert "- com.example.UserRepository" in content
     assert "- com.example.UserRequirements" in content
+    assert "- com.example.users.User" in content
     assert "- org.junit.jupiter.api.Test" not in content
+
+    assert "### Graph" in content
+    assert "```mermaid" in content
+    assert "UserTest --> UserRepository" in content
+    assert "UserTest --> UserRequirements" in content
+    assert "UserTest --> User" in content
+    assert "UserTest --> Test" not in content
+

@@ -21,6 +21,7 @@ class ClassDocumentation:
     class_name: str
     package: str
     dependencies: list[str]
+    dependency_graph: str
     summary: SummaryDocumentation
     methods: list[MethodDocumentation]
     nested_classes: list["ClassDocumentation"] = field(default_factory=list)

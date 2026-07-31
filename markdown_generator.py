@@ -1,5 +1,6 @@
 from pathlib import Path
 from markdown_writer import MarkdownWriter
+from mermaid_renderer import MermaidRenderer
 from version import __version__
 from datetime import datetime
 
@@ -36,9 +37,7 @@ class MarkdownGenerator:
 
     def _create_documentation(self, test_file: TestFile, test_class: TestClass, dependency_graph: DependencyGraph) -> ClassDocumentation:
         methods, summary = self._collect_methods(test_class)
-        dependencies = self._collect_dependencies(test_class, dependency_graph)
-
-        print(dependencies)
+        dependencies, dp_graph = self._collect_dependencies(test_class, dependency_graph)
 
         nested = [
             self._create_documentation(
@@ -53,6 +52,7 @@ class MarkdownGenerator:
             class_name=test_class.name,
             package=self._get_package(test_file),
             dependencies=dependencies,
+            dependency_graph=dp_graph,
             summary=summary,
             methods=methods,
             nested_classes=nested
@@ -158,13 +158,21 @@ class MarkdownGenerator:
 
         return writer.build()
 
-    def _render_dependencies(self, dependencies: list[str], level: int = 2) -> str:
+    def _render_dependencies(self, dependencies: list[str], dependency_graph: str, level: int = 2) -> str:
         writer = MarkdownWriter()
 
         writer.heading(level, "Dependencies")
+
+        if len(dependencies) == 0:
+            return writer.build()
+
+        writer.heading(level+1, "List")
         for dependency in dependencies:
             writer.bullet(dependency)
         writer.blank_line()
+
+        writer.heading(level+1, "Graph")
+        writer.code_block("mermaid", dependency_graph)
 
         return writer.build()
 
@@ -172,7 +180,7 @@ class MarkdownGenerator:
         writer = MarkdownWriter()
 
         writer.section(self._render_summary(documentation.summary, level))
-        writer.section(self._render_dependencies(documentation.dependencies, level))
+        writer.section(self._render_dependencies(documentation.dependencies, documentation.dependency_graph, level))
         writer.section(self._render_methods(documentation.methods, level))
 
         for nested in documentation.nested_classes:
@@ -335,8 +343,10 @@ class MarkdownGenerator:
         for nested in test_class.nested_classes:
             self._collect_package_classes(nested, entries, document_name, depth+1)
 
-    def _collect_dependencies(self, test_class: TestClass, dependency_graph: DependencyGraph) -> list[str]:
-        return [
-            dependency.target
+    def _collect_dependencies(self, test_class: TestClass, dependency_graph: DependencyGraph) -> tuple[list[str], str]:
+        return (
+            [dependency.target
             for dependency in dependency_graph.dependencies_for(test_class.qualified_name)
-        ]
+            ],
+            MermaidRenderer().render(dependency_graph, test_class.qualified_name)
+        )
