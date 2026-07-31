@@ -19,9 +19,11 @@ def test_indexer():
                 classes=[
                     TestClass(
                         name="UserTest",
+                        qualified_name="com.example.users.UserTest",
                         nested_classes=[
                             TestClass(
-                                name="LoginTests"
+                                name="LoginTests",
+                                qualified_name="com.example.users.UserTest.LoginTests"
                             )
                         ]
                     )

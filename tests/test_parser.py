@@ -11,7 +11,7 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
 
-from parser import JavaParser
+from parsing.parser import JavaParser
 from models import TestClass, TestFile as SourceTestFile, TestMethod
 
 FILE_CONTENTS = dedent("""\
@@ -119,7 +119,7 @@ def _get_class(class_name: str, class_list: list[TestClass]) -> TestClass:
         if cls.name == class_name:
             return cls
 
-    return TestClass(name="Not Found")
+    return TestClass(name="Not Found", qualified_name="Not Found")
 
 def _get_method(method_name: str, cls: TestClass) -> TestMethod:
     for method in cls.methods:
