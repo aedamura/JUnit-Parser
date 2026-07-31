@@ -1,6 +1,8 @@
 from pathlib import Path
 
 from analysis.dependency_model import DependencyGraph
+from markdown_writer import MarkdownWriter
+from mermaid_renderer import MermaidRenderer
 
 
 class DependencyGraphGenerator:
@@ -14,26 +16,21 @@ class DependencyGraphGenerator:
 
 
     def _render(self, graph: DependencyGraph) -> str:
-        lines = []
+        writer = MarkdownWriter()
 
-        lines.append("# Dependency Graph")
-        lines.append("")
-        lines.append("This graph shows dependencies from JUnit test classes to imported production classes.")
-        lines.append("")
-        lines.append("```mermaid")
-        lines.append("graph TD")
-        lines.append("")
+        writer.heading(1, "Dependency Graph")
+        writer.line("This graph shows dependencies from JUnit test classes to imported production classes.")
+        writer.blank_line()
 
+        renderer = MermaidRenderer()
+
+        text = ""
         for dependency in sorted(graph.dependencies, key=lambda d: (d.source, d.target)):
-            source = dependency.source.split(".")[-1]
-            target = dependency.target.split(".")[-1]
+            text += renderer.render(graph, dependency.source) + "\n"
 
-            lines.append(f"{source} --> {target}")
+        writer.code_block("mermaid", text)
 
-        lines.append("")
-        lines.append("```")
-
-        return "\n".join(lines)
+        return writer.build()
 
     def _write(self, output_dir: Path, markdown: str):
         output_path = output_dir / "dependency_graph.md"
