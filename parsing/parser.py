@@ -1,7 +1,7 @@
 import javalang
 
 from javalang.tree import ClassDeclaration, MethodDeclaration
-from annotations import (
+from parsing.annotations import (
     is_test_annotation,
     is_lifecycle_annotation,
     is_meta_annotation

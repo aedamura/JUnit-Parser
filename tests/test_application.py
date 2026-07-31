@@ -8,13 +8,13 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
 from application import Application
-from dependency_analyzer import DependencyAnalyzer
-from dependency_generator import DependencyGraphGenerator
-from indexer import Indexer
-from markdown_generator import MarkdownGenerator
-from parser import JavaParser
+from analysis.dependency_analyzer import DependencyAnalyzer
+from documentation.dependency_generator import DependencyGraphGenerator
+from analysis.indexer import Indexer
+from documentation.markdown_generator import MarkdownGenerator
+from parsing.parser import JavaParser
 from pipline import Pipeline
-from scanner import FileScanner
+from parsing.scanner import FileScanner
 
 
 def test_application_generates_documentation(tmp_path):

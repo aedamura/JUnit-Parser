@@ -1,9 +1,9 @@
 from pathlib import Path
 
-from indexer import Indexer
+from analysis.indexer import Indexer
 from models import Project
-from parser import JavaParser
-from scanner import FileScanner
+from parsing.parser import JavaParser
+from parsing.scanner import FileScanner
 
 
 class Pipeline:

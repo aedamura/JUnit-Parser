@@ -8,7 +8,7 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
 
-from analyzer import JUnitAnalyzer
+from analysis.analyzer import JUnitAnalyzer
 from models import TestMethod
 
 def test_analyzer_stores_lifecycle():

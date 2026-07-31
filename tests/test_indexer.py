@@ -6,7 +6,7 @@ parent_dir = os.path.dirname(current_dir)
 
 sys.path.append(parent_dir)
 
-from indexer import Indexer
+from analysis.indexer import Indexer
 from models import Project, TestClass, TestFile
 
 

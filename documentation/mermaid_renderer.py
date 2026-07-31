@@ -1,5 +1,5 @@
-from dependency_model import DependencyGraph
-from markdown_writer import MarkdownWriter
+from analysis.dependency_model import DependencyGraph
+from documentation.markdown_writer import MarkdownWriter
 from models import TestClass
 
 

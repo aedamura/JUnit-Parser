@@ -1,6 +1,6 @@
-from dependency_model import Dependency, DependencyGraph
+from analysis.dependency_model import Dependency, DependencyGraph
 from models import Project, TestClass, TestFile
-from type_resolver import TypeResolver
+from analysis.type_resolver import TypeResolver
 
 
 class DependencyAnalyzer:

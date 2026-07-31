@@ -1,5 +1,5 @@
 from models import Project, TestClass, TestMethod
-from annotations import TEST_ANNOTATIONS, LIFECYCLE_ANNOTATIONS
+from parsing.annotations import TEST_ANNOTATIONS, LIFECYCLE_ANNOTATIONS
 
 class JUnitAnalyzer:
 

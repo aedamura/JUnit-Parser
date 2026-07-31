@@ -1,12 +1,12 @@
 from pathlib import Path
-from markdown_writer import MarkdownWriter
-from mermaid_renderer import MermaidRenderer
+from documentation.markdown_writer import MarkdownWriter
+from documentation.mermaid_renderer import MermaidRenderer
 from version import __version__
 from datetime import datetime
 
 from models import Project, TestClass, TestFile, TestMethod
-from markdown_models import ClassDocumentation, MethodDocumentation, SummaryDocumentation
-from dependency_model import DependencyGraph
+from documentation.markdown_models import ClassDocumentation, MethodDocumentation, SummaryDocumentation
+from analysis.dependency_model import DependencyGraph
 
 
 

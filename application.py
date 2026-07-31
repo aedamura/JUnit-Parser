@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from dependency_analyzer import DependencyAnalyzer
-from dependency_generator import DependencyGraphGenerator
-from markdown_generator import MarkdownGenerator
+from analysis.dependency_analyzer import DependencyAnalyzer
+from documentation.dependency_generator import DependencyGraphGenerator
+from documentation.markdown_generator import MarkdownGenerator
 from pipline import Pipeline
 
 

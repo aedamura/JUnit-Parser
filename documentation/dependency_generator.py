@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from dependency_model import DependencyGraph
+from analysis.dependency_model import DependencyGraph
 
 
 class DependencyGraphGenerator:

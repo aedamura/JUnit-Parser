@@ -8,10 +8,10 @@ parent_dir = os.path.dirname(current_dir)
 
 sys.path.append(parent_dir)
 
-from dependency_analyzer import DependencyAnalyzer
-from dependency_model import DependencyGraph, Dependency
+from analysis.dependency_analyzer import DependencyAnalyzer
+from analysis.dependency_model import DependencyGraph, Dependency
 from models import Project, TestFile as SourceTestFile
-from parser import JavaParser
+from parsing.parser import JavaParser
 
 def _parse(file) -> Project:
     return Project(
@@ -98,12 +98,12 @@ def test_dependency_analyzer_captures_fields(tmp_path):
 
     assert len(graph.dependencies) == 2
     assert any(
-        dependency.target == "User"
+        dependency.target == "com.example.users.User"
         for dependency in graph.dependencies
     )
 
     assert any(
-        dependency.target == "Register"
+        dependency.target == "com.example.users.Register"
         for dependency in graph.dependencies
     )
 
@@ -133,7 +133,7 @@ def test_source_and_target_are_properly_labeled(tmp_path):
         for dependency in graph.dependencies
     )  
     assert any(
-        dependency.target == "User"
+        dependency.target == "com.example.users.User"
         for dependency in graph.dependencies
     )
 
