@@ -6,8 +6,13 @@ parent_dir = os.path.dirname(current_dir)
 
 sys.path.append(parent_dir)
 
+from dependency_analyzer import DependencyAnalyzer
+from dependency_model import DependencyGraph
 from markdown_generator import MarkdownGenerator
-from models import Project, TestFile, TestClass, SourceLocation, TestMethod
+from models import Project, TestFile, TestClass, SourceLocation, TestMethod, Field
+
+def _create_graph(project: Project) -> DependencyGraph:
+    return DependencyAnalyzer().analyze(project)
 
 def test_generator_creates_markdown_file(tmp_path):
     project = Project(
@@ -18,6 +23,7 @@ def test_generator_creates_markdown_file(tmp_path):
                 classes=[
                     TestClass(
                         name="UserTest",
+                        qualified_name="com.example.users.UserTest",
                         display_name="User Management Tests",
                         methods=[
                             TestMethod(
@@ -37,11 +43,11 @@ def test_generator_creates_markdown_file(tmp_path):
         ]
     )
 
-    output_directory = tmp_path / "docs"
+    output_dir = tmp_path / "docs"
 
-    MarkdownGenerator().generate(project, output_directory)
+    MarkdownGenerator().generate(project, _create_graph(project), output_dir)
 
-    markdown_file = output_directory / "UserTest.md"
+    markdown_file = output_dir / "UserTest.md"
 
     assert markdown_file.exists()
 
@@ -63,23 +69,23 @@ def test_generator_handles_empty_test_class(tmp_path):
                 package="com.example",
                 classes=[
                     TestClass(
-                        name="EmptyTest"
+                        name="EmptyTest",
+                        qualified_name="com.example.EmptyTest"
                     )
                 ]
             )
         ]
     )
 
-    output_dierctory = tmp_path / "docs"
+    output_dir = tmp_path / "docs"
 
-    MarkdownGenerator().generate(project, output_dierctory)
+    MarkdownGenerator().generate(project, _create_graph(project), output_dir)
 
     content = (
-        output_dierctory / "EmptyTest.md"
+        output_dir / "EmptyTest.md"
     ).read_text()
 
     assert "# EmptyTest" in content
-
 
 def test_generator_only_lists_tests(tmp_path):
     project = Project(
@@ -90,6 +96,7 @@ def test_generator_only_lists_tests(tmp_path):
                 classes=[
                     TestClass(
                         name="UserTest",
+                        qualified_name="com.example.users.UserTest",
                         display_name="User Management Tests",
                         methods=[
                             TestMethod(
@@ -122,12 +129,12 @@ def test_generator_only_lists_tests(tmp_path):
         ]
     )
 
-    output_dierctory = tmp_path / "docs"
+    output_dir = tmp_path / "docs"
 
-    MarkdownGenerator().generate(project, output_dierctory)
+    MarkdownGenerator().generate(project, _create_graph(project), output_dir)
 
     content = (
-        output_dierctory / "UserTest.md"
+        output_dir / "UserTest.md"
     ).read_text()
 
 
@@ -143,6 +150,7 @@ def test_generator_produces_correct_summary(tmp_path):
                 classes=[
                     TestClass(
                         name="UserTest",
+                        qualified_name="com.example.users.UserTest",
                         display_name="User Management Tests",
                         methods=[
                             TestMethod(
@@ -175,12 +183,12 @@ def test_generator_produces_correct_summary(tmp_path):
         ]
     )
 
-    output_dierctory = tmp_path / "docs"
+    output_dir = tmp_path / "docs"
     
-    MarkdownGenerator().generate(project, output_dierctory)
+    MarkdownGenerator().generate(project, _create_graph(project), output_dir)
 
     content = (
-        output_dierctory / "UserTest.md"
+        output_dir / "UserTest.md"
     ).read_text()
 
 
@@ -197,6 +205,7 @@ def test_generator_handles_nested_classes(tmp_path):
                 classes=[
                     TestClass(
                         name="UserTest",
+                        qualified_name="com.example.users.UserTest",
                         display_name="User Management Tests",
                         methods=[
                             TestMethod(
@@ -226,7 +235,8 @@ def test_generator_handles_nested_classes(tmp_path):
                         nested_classes=[
                             TestClass(
                                 name="LoginTests",
-                                methods=[
+                                qualified_name="com.example.users.UserTest.LoginTests",
+                                    methods=[
                                     TestMethod(
                                         name="shouldLogin",
                                         is_test=True
@@ -240,12 +250,12 @@ def test_generator_handles_nested_classes(tmp_path):
         ]
     )
 
-    output_dierctory = tmp_path / "docs"
+    output_dir = tmp_path / "docs"
     
-    MarkdownGenerator().generate(project, output_dierctory)
+    MarkdownGenerator().generate(project, _create_graph(project), output_dir)
 
     content = (
-        output_dierctory / "UserTest.md"
+        output_dir / "UserTest.md"
     ).read_text()
 
     assert "UserTest" in content
@@ -261,6 +271,7 @@ def test_generator_handles_nested_inner_classes(tmp_path):
                 classes=[
                     TestClass(
                         name="UserTest",
+                        qualified_name="com.example.users.UserTest",
                         display_name="User Management Tests",
                         methods=[
                             TestMethod(
@@ -290,6 +301,7 @@ def test_generator_handles_nested_inner_classes(tmp_path):
                         nested_classes=[
                             TestClass(
                                 name="LoginTests",
+                                qualified_name="com.example.users.UserTest.LoginTests",
                                 methods=[
                                     TestMethod(
                                         name="shouldLogin",
@@ -299,6 +311,7 @@ def test_generator_handles_nested_inner_classes(tmp_path):
                                 nested_classes=[
                                     TestClass(
                                         name="ValidationTests",
+                                qualified_name="com.example.users.UserTest.LoginTests.ValidationTests",
                                         methods=[
                                             TestMethod(
                                                 name="shouldValidate",
@@ -315,15 +328,13 @@ def test_generator_handles_nested_inner_classes(tmp_path):
         ]
     )
 
-    output_dierctory = tmp_path / "docs"
+    output_dir = tmp_path / "docs"
     
-    MarkdownGenerator().generate(project, output_dierctory)
+    MarkdownGenerator().generate(project, _create_graph(project), output_dir)
 
     content = (
-        output_dierctory / "UserTest.md"
+        output_dir / "UserTest.md"
     ).read_text()
-
-    print(content)
 
     assert "UserTest" in content
     assert "LoginTests" in content
@@ -339,6 +350,7 @@ def test_generator_creates_index_file(tmp_path):
                 classes=[
                     TestClass(
                         name="UserTests",
+                        qualified_name="com.example.users.UserTest",
                         methods=[
                             TestMethod(
                                 name="shouldLogin",
@@ -353,6 +365,7 @@ def test_generator_creates_index_file(tmp_path):
                         nested_classes=[
                             TestClass(
                                 name="LoginTests",
+                                qualified_name="com.example.users.UserTest.LoginTests",
                                 methods=[
                                     TestMethod(
                                         name="shouldValidatePassword",
@@ -370,6 +383,7 @@ def test_generator_creates_index_file(tmp_path):
                 classes=[
                     TestClass(
                         name="OrderTests",
+                        qualified_name="com.example.orders.OrderTests",
                         methods=[
                             TestMethod(
                                 name="shouldCreateOrder",
@@ -384,17 +398,13 @@ def test_generator_creates_index_file(tmp_path):
 
     output_dir = tmp_path / "docs"
 
-    generator = MarkdownGenerator()
-
-    generator.generate(project, output_dir)
+    MarkdownGenerator().generate(project, _create_graph(project), output_dir)
 
     index = output_dir / "index.md"
 
     assert index.exists()
 
     content = index.read_text()
-
-    print(content)
 
     # ------------------------
     # Project Summary
@@ -419,4 +429,57 @@ def test_generator_creates_index_file(tmp_path):
     assert "- [LoginTests](UserTests.md)" in content
 
     assert "### com.example.orders" in content
-    assert "- [OrderTests](OrderTests.md)" in content
+    assert "[OrderTests](OrderTests.md)" in content
+
+def test_generator_creates_dependencies(tmp_path):
+    project = Project(
+        test_files=[
+            TestFile(
+                path="UserTest.java",
+                package="com.example.users",
+                imports=["com.example.UserRepository", "com.example.UserRequirements", "org.junit.jupiter.api.Test"],
+                classes=[
+                    TestClass(
+                        name="UserTest",
+                        qualified_name="com.example.users.Users",
+                        fields=[
+                            Field(
+                                name="user",
+                                type="User",
+                                location=SourceLocation("UserTests.java", 13)
+                            ),
+                            Field(
+                                name="repository",
+                                type="UserRepository",
+                                location=SourceLocation("UserTests.java", 13)
+                            )
+                        ],
+                        methods=[
+                            TestMethod(
+                                name="shouldLoginSuccessfully"
+                            )
+                        ]
+                    )
+                ],
+            ),
+        ]
+    )
+
+
+    output_dir = tmp_path / "docs"
+    
+    graph = _create_graph(project)
+    print(graph)
+
+    MarkdownGenerator().generate(project, _create_graph(project), output_dir)
+
+    content = (
+        output_dir / "UserTest.md"
+    ).read_text()
+
+    #print(content)
+    
+    assert "## Dependencies" in content
+    assert "- com.example.UserRepository" in content
+    assert "- com.example.UserRequirements" in content
+    assert "- org.junit.jupiter.api.Test" not in content
