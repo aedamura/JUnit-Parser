@@ -19,7 +19,7 @@ class MarkdownGenerator:
         for test_file in project.test_files:
             for test_class in test_file.classes:
 
-                documentation = self._create_documentation(
+                documentation = self._create_class_documentation(
                     test_file,
                     test_class,
                     dependency_graph
@@ -35,12 +35,16 @@ class MarkdownGenerator:
 
         self._write_index(project, output_dir)
 
-    def _create_documentation(self, test_file: TestFile, test_class: TestClass, dependency_graph: DependencyGraph) -> ClassDocumentation:
+    # ------------
+    # Documentation Object Constructors
+    # ------------
+
+    def _create_class_documentation(self, test_file: TestFile, test_class: TestClass, dependency_graph: DependencyGraph) -> ClassDocumentation:
         methods, summary = self._collect_methods(test_class)
         dependencies, dp_graph = self._collect_dependencies(test_class, dependency_graph)
 
         nested = [
-            self._create_documentation(
+            self._create_class_documentation(
                 test_file,
                 nested_class,
                 dependency_graph
@@ -58,10 +62,7 @@ class MarkdownGenerator:
             nested_classes=nested
         )
 
-    def _get_title(self, test_class: TestClass) -> str:
-        return test_class.display_name or test_class.name
-
-    def _create_method(self, method: TestMethod) -> MethodDocumentation:
+    def _create_method_documentation(self, method: TestMethod) -> MethodDocumentation:
         return MethodDocumentation(
             title=method.display_name or method.name,
             method_name=method.name,
@@ -69,33 +70,6 @@ class MarkdownGenerator:
             disabled=method.is_disabled,
             location=method.location
         )
-
-    def _get_package(self, test_file: TestFile) -> str:
-        return test_file.package
-
-    def _collect_methods(self, test_class: TestClass) -> tuple[list[MethodDocumentation], SummaryDocumentation]:
-
-        methods = []
-
-        summary = SummaryDocumentation()
-
-        for method in test_class.methods:
-
-            if method.is_test:
-                summary.tests+=1
-
-                if method.is_disabled:
-                    summary.disabled+=1
-
-                if method.tags:
-                    summary.tagged+=1
-
-                methods.append(self._create_method(method))
-
-        return methods, summary
-
-    def _get_class_name(self, test_class: TestClass) -> str:
-        return test_class.name
 
     # ------------
     # Rendering Functions
@@ -239,6 +213,63 @@ class MarkdownGenerator:
 
         output_path.write_text(writer.build(), encoding="utf-8")
 
+    # ------------
+    # Data Collection Functions
+    # ------------
+
+    def _collect_packages_and_classes(self, files: list[TestFile]) -> dict[str, list[tuple[str, str, int]]]:
+        packages = {}
+
+        for file in files:
+            package = file.package
+            package_entries = []
+
+            packages.setdefault(package, package_entries)
+
+            file_class = file.classes[0]
+
+            for cls in file.classes:
+                self._collect_package_classes(cls, package_entries, document_name=file_class.name+".md", depth=0)
+
+        return packages
+
+    def _collect_package_classes(self, test_class: TestClass, entries: list[tuple[str,str,int]],document_name: str, depth: int):
+        entries.append(
+            (test_class.name, document_name, depth)
+        )
+
+        for nested in test_class.nested_classes:
+            self._collect_package_classes(nested, entries, document_name, depth+1)
+
+    def _collect_dependencies(self, test_class: TestClass, dependency_graph: DependencyGraph) -> tuple[list[str], str]:
+        return (
+            [dependency.target
+            for dependency in dependency_graph.dependencies_for(test_class.qualified_name)
+            ],
+            MermaidRenderer().render(dependency_graph, test_class.qualified_name)
+        )
+    
+    def _collect_methods(self, test_class: TestClass) -> tuple[list[MethodDocumentation], SummaryDocumentation]:
+
+        methods = []
+
+        summary = SummaryDocumentation()
+
+        for method in test_class.methods:
+
+            if method.is_test:
+                summary.tests+=1
+
+                if method.is_disabled:
+                    summary.disabled+=1
+
+                if method.tags:
+                    summary.tagged+=1
+
+                methods.append(self._create_method_documentation(method))
+
+        return methods, summary
+
     # -----------------
     # Project Summary Functions
     # -----------------
@@ -257,7 +288,6 @@ class MarkdownGenerator:
             total += self._count_classes(file.classes)
 
         return total
-
 
     def _count_classes(self, classes: list[TestClass]) -> int:
         total = 0
@@ -318,35 +348,15 @@ class MarkdownGenerator:
 
         return total
 
-    def _collect_packages_and_classes(self, files: list[TestFile]) -> dict[str, list[tuple[str, str, int]]]:
-        packages = {}
+    # --------------
+    # Helper Functions
+    # --------------
 
-        for file in files:
-            package = file.package
-            package_entries = []
+    def _get_package(self, test_file: TestFile) -> str:
+        return test_file.package
 
-            packages.setdefault(package, package_entries)
+    def _get_title(self, test_class: TestClass) -> str:
+        return test_class.display_name or test_class.name
 
-            file_class = file.classes[0]
-
-            for cls in file.classes:
-                self._collect_package_classes(cls, package_entries, document_name=file_class.name+".md", depth=0)
-
-        return packages
-
-    
-    def _collect_package_classes(self, test_class: TestClass, entries: list[tuple[str,str,int]],document_name: str, depth: int):
-        entries.append(
-            (test_class.name, document_name, depth)
-        )
-
-        for nested in test_class.nested_classes:
-            self._collect_package_classes(nested, entries, document_name, depth+1)
-
-    def _collect_dependencies(self, test_class: TestClass, dependency_graph: DependencyGraph) -> tuple[list[str], str]:
-        return (
-            [dependency.target
-            for dependency in dependency_graph.dependencies_for(test_class.qualified_name)
-            ],
-            MermaidRenderer().render(dependency_graph, test_class.qualified_name)
-        )
+    def _get_class_name(self, test_class: TestClass) -> str:
+        return test_class.name
