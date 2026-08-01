@@ -2,7 +2,6 @@ from analysis.dependency_model import Dependency, DependencyGraph
 from models import Project, TestClass, TestFile
 from analysis.type_resolver import TypeResolver
 
-
 class DependencyAnalyzer:
 
     def __init__(self):
@@ -40,19 +39,6 @@ class DependencyAnalyzer:
 
         for nested in test_class.nested_classes:
             self._analyze_class(nested, test_file, graph, project)
-
-    def _build_lookup_table(self, test_file: TestFile) -> dict[str, str]:
-        lookup = {}
-
-        for import_name in test_file.imports:
-            simple_name = import_name.split(".")[-1]
-
-            lookup[simple_name] = import_name
-
-        return lookup
-
-    def _resolve_type(self, field_type: str, lookup: dict[str, str]) -> str:
-        return lookup.get(field_type, field_type)
 
     def _is_dependency(self, import_name: str) -> bool:
         ignored_prefixes = (
