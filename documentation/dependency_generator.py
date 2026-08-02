@@ -1,8 +1,8 @@
 from pathlib import Path
 
 from analysis.dependency_model import DependencyGraph
-from markdown_writer import MarkdownWriter
-from mermaid_renderer import MermaidRenderer
+from documentation.markdown_writer import MarkdownWriter
+from documentation.mermaid_renderer import MermaidRenderer
 
 
 class DependencyGraphGenerator:
