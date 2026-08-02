@@ -20,7 +20,7 @@ class Application:
         self._dependency_graph_generator = dependency_graph_generator
 
 
-    def run(self, input_directory: Path, output_directory: Path,):
+    def run(self, input_directory: Path, output_directory: Path,) -> int:
         project = self._pipeline.run(input_directory)
 
         dependency_graph = self._dependency_analyzer.analyze(project)
@@ -28,6 +28,8 @@ class Application:
         self._markdown_generator.generate(project, dependency_graph, output_directory)
 
         self._dependency_graph_generator.generate(dependency_graph, output_directory)
+
+        return len(project.test_files)
 
 
     
