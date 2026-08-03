@@ -1,12 +1,13 @@
 from pathlib import Path
-from documentation.markdown_writer import MarkdownWriter
-from documentation.mermaid_renderer import MermaidRenderer
 from version import __version__
 from datetime import datetime
 
 from models import Project, TestClass, TestFile, TestMethod
 from documentation.markdown_models import ClassDocumentation, MethodDocumentation, SummaryDocumentation
+from documentation.markdown_writer import MarkdownWriter
+from documentation.mermaid_renderer import MermaidRenderer
 from analysis.dependency_model import DependencyGraph
+from analysis.project_report import ProjectReport
 
 
 
@@ -175,18 +176,22 @@ class MarkdownGenerator:
 
         output_path.write_text(markdown, encoding="utf-8")
 
-    def _write_index(self, project: Project, output_dir: Path):
+    def _write_index(self, project: Project, project_report: ProjectReport, output_dir: Path):
         writer = MarkdownWriter()
 
         writer.heading(1, "JUnit Test Documentation")
 
         writer.heading(2, "Project Summary")
 
-        writer.bullet(f"Package Count: {self._count_packages(project)}")
-        writer.bullet(f"Test Files: {len(project.test_files)}")
-        writer.bullet(f"Test Classes: {self._count_classes_from_files(project.test_files)}")
-        writer.bullet(f"Test Methods: {self._count_test_methods_from_files(project.test_files)}")
-        writer.bullet(f"Disabled Tests: {self._count_disabled_methods_from_files(project.test_files)}")
+        writer.bullet(f"Packages: {project_report.metrics.package_count}")
+        writer.bullet(f"Test Files: {project_report.metrics.test_file_count}")
+        writer.bullet(f"Test Classes: {project_report.metrics.test_class_count}")
+        writer.bullet(f"Nested Classes: {project_report.metrics.nested_class_count}")
+        writer.bullet(f"Test Methods: {project_report.metrics.test_method_count}")
+        writer.bullet(f"Parameterized Tests: {project_report.metrics.parameterized_test_count}")
+        writer.bullet(f"Disabled Tests: {project_report.metrics.disabled_test_count}")
+        writer.bullet(f"Tagged Tests: {project_report.metrics.tagged_test_count}")
+        writer.bullet(f"Lifecycle Methods: {project_report.metrics.lifecycle_method_count}")
         writer.blank_line()
 
         writer.horizontal_rule()
