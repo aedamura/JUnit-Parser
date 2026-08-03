@@ -1,22 +1,27 @@
 import os
 import sys
 
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 
 sys.path.append(parent_dir)
 
 from analysis.dependency_analyzer import DependencyAnalyzer
-from analysis.analysis_models import DependencyGraph, ProjectReport
+from analysis.analysis_models import DependencyGraph, ProjectReport, CoverageReport
 from documentation.markdown_generator import MarkdownGenerator
 from models import Project, TestFile, TestClass, SourceLocation, TestMethod, Field
 from analysis.project_analyzer import ProjectAnalyzer
+from analysis.coverage_analyzer import CoverageAnalyzer
 
 def _create_graph(project: Project) -> DependencyGraph:
     return DependencyAnalyzer().analyze(project)
 
 def _create_report(project: Project) -> ProjectReport:
     return ProjectAnalyzer().analyze(project)
+
+def _create_coverage_report(project: Project) -> CoverageReport:
+    return CoverageAnalyzer().analyze(_create_graph(project))
 
 def test_generator_creates_markdown_file(tmp_path):
     project = Project(
@@ -49,7 +54,7 @@ def test_generator_creates_markdown_file(tmp_path):
 
     output_dir = tmp_path / "docs"
 
-    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), output_dir)
+    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), _create_coverage_report(project), output_dir)
 
     markdown_file = output_dir / "UserTest.md"
 
@@ -83,7 +88,7 @@ def test_generator_handles_empty_test_class(tmp_path):
 
     output_dir = tmp_path / "docs"
 
-    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), output_dir)
+    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), _create_coverage_report(project), output_dir)
 
     content = (
         output_dir / "EmptyTest.md"
@@ -135,7 +140,7 @@ def test_generator_only_lists_tests(tmp_path):
 
     output_dir = tmp_path / "docs"
 
-    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), output_dir)
+    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), _create_coverage_report(project), output_dir)
 
     content = (
         output_dir / "UserTest.md"
@@ -188,8 +193,8 @@ def test_generator_produces_correct_summary(tmp_path):
     )
 
     output_dir = tmp_path / "docs"
-    
-    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), output_dir)
+
+    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), _create_coverage_report(project), output_dir)
 
     content = (
         output_dir / "UserTest.md"
@@ -255,8 +260,8 @@ def test_generator_handles_nested_classes(tmp_path):
     )
 
     output_dir = tmp_path / "docs"
-    
-    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), output_dir)
+
+    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), _create_coverage_report(project), output_dir)
 
     content = (
         output_dir / "UserTest.md"
@@ -333,8 +338,8 @@ def test_generator_handles_nested_inner_classes(tmp_path):
     )
 
     output_dir = tmp_path / "docs"
-    
-    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), output_dir)
+
+    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), _create_coverage_report(project), output_dir)
 
     content = (
         output_dir / "UserTest.md"
@@ -406,7 +411,7 @@ def test_generator_creates_index_file(tmp_path):
 
     output_dir = tmp_path / "docs"
 
-    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), output_dir)
+    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), _create_coverage_report(project), output_dir)
 
     index = output_dir / "index.md"
 
@@ -492,7 +497,7 @@ def test_generator_creates_dependencies(tmp_path):
     graph = _create_graph(project)
     #print(graph)
 
-    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), output_dir)
+    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), _create_coverage_report(project), output_dir)
 
     content = (
         output_dir / "UserTest.md"
@@ -515,3 +520,79 @@ def test_generator_creates_dependencies(tmp_path):
     assert "UserTest --> User" in content
     assert "UserTest --> Test" not in content
 
+    def test_generator_creates_coverage_report():
+        project = Project(
+            test_files=[
+                TestFile(
+                    path="UserTests.java",
+                    package="com.example.users",
+                    imports=["com.example.repositories.UserRepository", "com.example.orders.Order",
+                             "org.junit.jupiter.api.Test"],
+                    classes=[
+                        TestClass(
+                            name="UserTests",
+                            qualified_name="com.example.users.UserTest",
+                            fields=[Field(type="User", name="name", location=SourceLocation("UserTest.java", 8))],
+                            methods=[
+                                TestMethod(
+                                    name="shouldLogin",
+                                    is_test=True,
+                                ),
+                                TestMethod(
+                                    name="shouldDelete",
+                                    is_test=True,
+                                    is_disabled=True,
+                                ),
+                            ],
+                            nested_classes=[
+                                TestClass(
+                                    name="LoginTests",
+                                    qualified_name="com.example.users.UserTest.LoginTests",
+                                    methods=[
+                                        TestMethod(
+                                            name="shouldValidatePassword",
+                                            is_test=True,
+                                        )
+                                    ]
+                                )
+                            ],
+                        )
+                    ],
+                ),
+                TestFile(
+                    path="OrderTests.java",
+                    package="com.example.orders",
+                    imports=["com.example.repositories.UserRepository", "com.example.users.User"],
+                    classes=[
+                        TestClass(
+                            name="OrderTest",
+                            qualified_name="com.example.orders.OrderTest",
+                            fields=[Field(type="UserRepository", name="name",
+                                          location=SourceLocation("OrderTest.java", 16))],
+                            methods=[
+                                TestMethod(
+                                    name="shouldCreateOrder",
+                                    is_test=True,
+                                )
+                            ],
+                        )
+                    ],
+                ),
+            ]
+        )
+
+        output_dir = tmp_path / "docs"
+
+        MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), _create_coverage_report(project), output_dir)
+
+        content = (
+            output_dir / "coverage_report.md"
+        )
+        print(content)
+
+        assert "# Coverage Report" in content
+        assert "## Coverage" in content
+        assert "### com.example.orders.Order" in content
+        assert "- [OrderTest](OrderTest.md)" in content
+        assert "- [UserTest](UserTest.md)" in content
+        assert "### com.example.users.User" in content

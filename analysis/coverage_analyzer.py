@@ -20,5 +20,5 @@ class CoverageAnalyzer:
             entry.tests = sorted(entry.tests)
 
         return CoverageReport(
-            entries=sorted(coverage, key=lambda entry: entry.target),
+            entries=sorted(coverage, key=lambda entry: entry.target.split(".")[-1]),
         )

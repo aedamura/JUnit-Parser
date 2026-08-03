@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from analysis.coverage_analyzer import CoverageAnalyzer
 from analysis.dependency_analyzer import DependencyAnalyzer
 from analysis.project_analyzer import ProjectAnalyzer
 from documentation.dependency_generator import DependencyGraphGenerator
@@ -14,12 +15,14 @@ class Application:
         markdown_generator: MarkdownGenerator,
         project_analyzer: ProjectAnalyzer,
         dependency_analyzer: DependencyAnalyzer,
+        coverage_analyzer: CoverageAnalyzer,
         dependency_graph_generator: DependencyGraphGenerator
     ):
         self._pipeline = pipeline
         self._markdown_generator = markdown_generator
         self._project_analyzer = project_analyzer
         self._dependency_analyzer = dependency_analyzer
+        self._coverage_analyzer = coverage_analyzer
         self._dependency_graph_generator = dependency_graph_generator
 
 
@@ -30,7 +33,9 @@ class Application:
 
         dependency_graph = self._dependency_analyzer.analyze(project)
 
-        self._markdown_generator.generate(project, dependency_graph, project_report, output_directory)
+        coverage_report = self._coverage_analyzer.analyze(dependency_graph)
+
+        self._markdown_generator.generate(project, dependency_graph, project_report, coverage_report,output_directory)
 
         self._dependency_graph_generator.generate(dependency_graph, output_directory)
 

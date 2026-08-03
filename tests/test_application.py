@@ -2,6 +2,8 @@ import os
 import sys
 from textwrap import dedent
 
+from analysis.project_analyzer import ProjectAnalyzer
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 
@@ -10,13 +12,13 @@ sys.path.append(parent_dir)
 from application import Application
 from analysis.dependency_analyzer import DependencyAnalyzer
 from documentation.dependency_generator import DependencyGraphGenerator
+from analysis.coverage_analyzer import CoverageAnalyzer
 from analysis.indexer import Indexer
 from analysis.analyzer import JUnitAnalyzer
 from documentation.markdown_generator import MarkdownGenerator
 from parsing.parser import JavaParser
 from pipline import Pipeline
 from parsing.scanner import FileScanner
-
 
 def test_application_generates_documentation(tmp_path):
 
@@ -156,17 +158,19 @@ def test_application_generates_documentation(tmp_path):
     
 
     pipeline = Pipeline(
-        FileScanner(),
-        JavaParser(),
-        JUnitAnalyzer(),
-        Indexer()
+        scanner=FileScanner(),
+        parser=JavaParser(),
+        analyzer=JUnitAnalyzer(),
+        indexer=Indexer()
     )
 
     application = Application(
-        pipeline,
-        MarkdownGenerator(),
-        DependencyAnalyzer(),
-        DependencyGraphGenerator()
+        pipeline=pipeline,
+        markdown_generator=MarkdownGenerator(),
+        project_analyzer=ProjectAnalyzer(),
+        dependency_analyzer=DependencyAnalyzer(),
+        coverage_analyzer=CoverageAnalyzer(),
+        dependency_graph_generator=DependencyGraphGenerator(),
     )
 
     project = pipeline.run(test_dir)
