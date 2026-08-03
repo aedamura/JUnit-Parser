@@ -1,4 +1,6 @@
 from dataclasses import dataclass, field
+
+from analysis.dependency_model import DependencyGraph
 from models import SourceLocation
 
 @dataclass
@@ -20,8 +22,7 @@ class ClassDocumentation:
     title: str
     class_name: str
     package: str
-    dependencies: list[str]
-    dependency_graph: str
+    dependencies: DependencyGraph
     summary: SummaryDocumentation
     methods: list[MethodDocumentation]
     nested_classes: list["ClassDocumentation"] = field(default_factory=list)
