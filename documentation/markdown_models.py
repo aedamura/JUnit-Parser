@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from analysis.dependency_model import DependencyGraph
+from analysis.analysis_models import DependencyGraph
 from models import SourceLocation
 
 @dataclass

@@ -6,8 +6,7 @@ from models import Project, TestClass, TestFile, TestMethod
 from documentation.markdown_models import ClassDocumentation, MethodDocumentation, SummaryDocumentation
 from documentation.markdown_writer import MarkdownWriter
 from documentation.mermaid_renderer import MermaidRenderer
-from analysis.dependency_model import DependencyGraph
-from analysis.project_report import ProjectReport
+from analysis.analysis_models import DependencyGraph, ProjectReport
 
 
 

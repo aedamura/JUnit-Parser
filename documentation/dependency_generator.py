@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from analysis.dependency_model import DependencyGraph
+from analysis.analysis_models import DependencyGraph
 from documentation.markdown_writer import MarkdownWriter
 from documentation.mermaid_renderer import MermaidRenderer
 

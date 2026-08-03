@@ -7,11 +7,10 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
 from analysis.dependency_analyzer import DependencyAnalyzer
-from analysis.dependency_model import DependencyGraph
+from analysis.analysis_models import DependencyGraph, ProjectReport
 from documentation.markdown_generator import MarkdownGenerator
 from models import Project, TestFile, TestClass, SourceLocation, TestMethod, Field
 from analysis.project_analyzer import ProjectAnalyzer
-from analysis.project_report import ProjectReport
 
 def _create_graph(project: Project) -> DependencyGraph:
     return DependencyAnalyzer().analyze(project)

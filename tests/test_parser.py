@@ -1,9 +1,6 @@
 import os
 import sys
 from textwrap import dedent
-from pathlib import Path
-
-import pytest
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)

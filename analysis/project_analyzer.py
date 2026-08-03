@@ -1,4 +1,4 @@
-from analysis.project_report import ProjectMetrics, ProjectReport
+from analysis.analysis_models import ProjectMetrics, ProjectReport
 from models import Project, TestFile, TestClass, TestMethod
 
 

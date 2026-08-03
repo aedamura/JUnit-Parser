@@ -9,7 +9,7 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
 from analysis.dependency_analyzer import DependencyAnalyzer
-from analysis.dependency_model import DependencyGraph, Dependency
+from analysis.analysis_models import DependencyGraph, Dependency
 from models import Project, TestFile as SourceTestFile
 from parsing.parser import JavaParser
 

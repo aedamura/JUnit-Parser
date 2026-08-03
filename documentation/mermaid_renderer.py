@@ -1,4 +1,4 @@
-from analysis.dependency_model import DependencyGraph
+from analysis.analysis_models import DependencyGraph
 from documentation.markdown_writer import MarkdownWriter
 
 class MermaidRenderer:

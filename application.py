@@ -30,7 +30,7 @@ class Application:
 
         dependency_graph = self._dependency_analyzer.analyze(project)
 
-        self._markdown_generator.generate(project, dependency_graph, output_directory)
+        self._markdown_generator.generate(project, dependency_graph, project_report, output_directory)
 
         self._dependency_graph_generator.generate(dependency_graph, output_directory)
 
