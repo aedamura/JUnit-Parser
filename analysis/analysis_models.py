@@ -36,3 +36,12 @@ class ProjectMetrics:
 @dataclass
 class ProjectReport:
     metrics: ProjectMetrics
+
+@dataclass
+class CoverageEntry:
+    target: str
+    tests: list[str]
+
+@dataclass
+class CoverageReport:
+    entries: list[CoverageEntry]
