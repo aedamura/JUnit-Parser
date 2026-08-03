@@ -56,7 +56,7 @@ class ProjectAnalyzer:
                 self._disabled_methods += 1
         if test_method.is_parameterized:
             self._parameterized_methods += 1
-        if "org.junit.jupiter.api.Tag" in test_method.tags:
+        if len(test_method.tags) > 0:
             self._tagged_methods += 1
         if test_method.lifecycle is not None:
             self._lifecycle_methods += 1
