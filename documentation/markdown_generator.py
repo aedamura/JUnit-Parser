@@ -167,6 +167,9 @@ class MarkdownGenerator:
         writer = MarkdownWriter()
 
         writer.section(self._render_class_title(documentation))
+        writer.line("← [Back to Index](index.md)")
+        writer.blank_line()
+
         writer.section(self._render_package(documentation.package))
 
         writer.section(self._render_class_body(documentation, 2))
@@ -216,13 +219,14 @@ class MarkdownGenerator:
         writer = MarkdownWriter()
 
         writer.heading(1, "Coverage Report")
+        writer.line("← [Back to Index](index.md)")
 
         writer.heading(2, "Coverage")
         for entry in coverage_report.entries:
             writer.heading(3, entry.target)
 
             for source in entry.tests:
-                writer.bullet(f"[{source}]({source}.md)")
+                writer.bullet(f"[{source}]({self._simple_name(source)}.md)")
             writer.blank_line()
 
         self._write_file(output_dir, "coverage_report.md", writer)
@@ -257,7 +261,7 @@ class MarkdownGenerator:
 
     def _collect_package_classes(self, test_class: TestClass, entries: list[tuple[str,str,int]],document_name: str, depth: int):
         entries.append(
-            (test_class.name, document_name, depth)
+            (test_class.name, document_name + "#" + test_class.name.lower().replace(" ", "-"), depth)
         )
 
         for nested in test_class.nested_classes:
@@ -374,3 +378,6 @@ class MarkdownGenerator:
 
     def _get_class_name(self, test_class: TestClass) -> str:
         return test_class.name
+
+    def _simple_name(self, qualified_name: str) -> str:
+        return qualified_name.split(".")[-1]
