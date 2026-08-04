@@ -9,6 +9,7 @@ class MermaidRenderer:
         qualified_name: bool = False
     ) -> str:
         writer = MarkdownWriter()
+        writer.line("graph TD")
 
         for dependency in sorted(graph.dependencies, key=lambda d: d.source):
             if qualified_name:
