@@ -26,3 +26,6 @@ def is_lifecycle_annotation(annotation_name: str) -> bool:
 
 def is_meta_annotation(annotation_name: str) -> bool:
     return annotation_name in META_ANNOTATIONS
+
+def is_annotation(annotation_name: str) -> bool:
+    return is_test_annotation(annotation_name) or is_lifecycle_annotation(annotation_name) or is_meta_annotation(annotation_name)

@@ -4,7 +4,7 @@ from javalang.tree import ClassDeclaration, MethodDeclaration
 from parsing.annotations import (
     is_test_annotation,
     is_lifecycle_annotation,
-    is_meta_annotation
+    is_meta_annotation, is_annotation
 )
 from models import Constructor, SourceLocation, TestClass, TestFile, TestMethod, Field
 
@@ -150,9 +150,8 @@ class JavaParser:
         )
 
     def _get_annotation_value(self, annotation):
-        if annotation.element is None:
+        if annotation.element is None or not is_annotation(annotation.name):
             return None
-
         return annotation.element.value.strip('"')
 
 def _qualified_name(
