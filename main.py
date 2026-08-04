@@ -8,6 +8,7 @@ from analysis.dependency_analyzer import DependencyAnalyzer
 from analysis.analyzer import JUnitAnalyzer
 from documentation.dependency_generator import DependencyGraphGenerator
 from analysis.indexer import Indexer
+from documentation.documentation_generator import DocumentationGenerator
 from documentation.markdown_generator import MarkdownGenerator
 from parsing.parser import JavaParser
 from pipline import Pipeline
@@ -31,6 +32,7 @@ def main():
         ProjectAnalyzer(),
         DependencyAnalyzer(),
         CoverageAnalyzer(),
+        DocumentationGenerator(),
         DependencyGraphGenerator()
     )
 
