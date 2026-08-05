@@ -54,8 +54,8 @@ class DocumentationGenerator:
 
     def _create_method_doc(self, test_method: TestMethod) -> MethodDocumentation:
         return MethodDocumentation(
-            title=test_method.name,
-            method_name=test_method.display_name,
+            title=self._get_title(test_method),
+            method_name=test_method.name,
             tags=test_method.tags,
             disabled=test_method.is_disabled,
             location=test_method.location,
@@ -88,6 +88,6 @@ class DocumentationGenerator:
     # Helper Functions
     # --------------------
 
-    def _get_title(self, test_class: TestClass) -> str:
+    def _get_title(self, test_class) -> str:
         return test_class.display_name or test_class.name
 

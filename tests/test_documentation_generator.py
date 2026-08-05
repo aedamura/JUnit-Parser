@@ -29,6 +29,8 @@ def test_documentation_generator_creates_proper_documentation():
                         methods=[
                             TestMethod(
                                 name="shouldLogin",
+                                display_name="User should login successfully",
+                                tags=["login"],
                                 is_test=True,
                             ),
                             TestMethod(
@@ -89,9 +91,14 @@ def test_documentation_generator_creates_proper_documentation():
 
     assert cls.summary.tests == 3
     assert cls.summary.disabled == 1
-    assert cls.summary.tagged == 1
+    assert cls.summary.tagged == 2
 
     assert len(cls.methods) == 2
+    assert cls.methods[0].title == "User should login successfully"
+    assert cls.methods[0].method_name == "shouldLogin"
+    assert cls.methods[0].tags == ["login"]
+    assert cls.methods[1].method_name == "shouldDelete"
+    assert cls.methods[1].disabled
 
     assert len(cls.nested_classes) == 1
     assert cls.nested_classes[0].title == "LoginTests"
