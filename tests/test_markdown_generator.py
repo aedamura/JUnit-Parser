@@ -1,7 +1,6 @@
 import os
 import sys
 
-
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 
@@ -13,6 +12,9 @@ from documentation.markdown_generator import MarkdownGenerator
 from models import Project, TestFile, TestClass, SourceLocation, TestMethod, Field
 from analysis.project_analyzer import ProjectAnalyzer
 from analysis.coverage_analyzer import CoverageAnalyzer
+from documentation.documentation_generator import DocumentationGenerator
+from documentation.markdown_models import ProjectDocumentation
+
 
 def _create_graph(project: Project) -> DependencyGraph:
     return DependencyAnalyzer().analyze(project)
@@ -22,6 +24,9 @@ def _create_report(project: Project) -> ProjectReport:
 
 def _create_coverage_report(project: Project) -> CoverageReport:
     return CoverageAnalyzer().analyze(_create_graph(project))
+
+def _create_project_documentation(project: Project, graph: DependencyGraph) -> ProjectDocumentation:
+    return DocumentationGenerator().generate(project, graph)
 
 def test_generator_creates_markdown_file(tmp_path):
     project = Project(
@@ -54,13 +59,20 @@ def test_generator_creates_markdown_file(tmp_path):
 
     output_dir = tmp_path / "docs"
 
-    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), _create_coverage_report(project), output_dir)
+    MarkdownGenerator().generate(
+        project,
+        _create_graph(project),
+        _create_report(project),
+        _create_project_documentation(project, _create_graph(project)),
+        _create_coverage_report(project),
+        output_dir
+    )
 
     markdown_file = output_dir / "UserTest.md"
 
     assert markdown_file.exists()
 
-    content = markdown_file.read_text()
+    content = markdown_file.read_text(encoding="utf-8")
 
     assert "# User Management Tests" in content
     assert "**Class:** `UserTest`" in content
@@ -88,11 +100,18 @@ def test_generator_handles_empty_test_class(tmp_path):
 
     output_dir = tmp_path / "docs"
 
-    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), _create_coverage_report(project), output_dir)
+    MarkdownGenerator().generate(
+        project,
+        _create_graph(project),
+        _create_report(project),
+        _create_project_documentation(project, _create_graph(project)),
+        _create_coverage_report(project),
+        output_dir
+    )
 
     content = (
         output_dir / "EmptyTest.md"
-    ).read_text()
+    ).read_text(encoding="utf-8")
 
     assert "# EmptyTest" in content
 
@@ -140,11 +159,18 @@ def test_generator_only_lists_tests(tmp_path):
 
     output_dir = tmp_path / "docs"
 
-    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), _create_coverage_report(project), output_dir)
+    MarkdownGenerator().generate(
+        project,
+        _create_graph(project),
+        _create_report(project),
+        _create_project_documentation(project, _create_graph(project)),
+        _create_coverage_report(project),
+        output_dir
+    )
 
     content = (
         output_dir / "UserTest.md"
-    ).read_text()
+    ).read_text(encoding="utf-8")
 
 
     assert "shouldCreateUser" in content
@@ -194,11 +220,18 @@ def test_generator_produces_correct_summary(tmp_path):
 
     output_dir = tmp_path / "docs"
 
-    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), _create_coverage_report(project), output_dir)
+    MarkdownGenerator().generate(
+        project,
+        _create_graph(project),
+        _create_report(project),
+        _create_project_documentation(project, _create_graph(project)),
+        _create_coverage_report(project),
+        output_dir
+    )
 
     content = (
         output_dir / "UserTest.md"
-    ).read_text()
+    ).read_text(encoding="utf-8")
 
 
     assert "- Tests: 1" in content
@@ -261,11 +294,18 @@ def test_generator_handles_nested_classes(tmp_path):
 
     output_dir = tmp_path / "docs"
 
-    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), _create_coverage_report(project), output_dir)
+    MarkdownGenerator().generate(
+        project,
+        _create_graph(project),
+        _create_report(project),
+        _create_project_documentation(project, _create_graph(project)),
+        _create_coverage_report(project),
+        output_dir
+    )
 
     content = (
         output_dir / "UserTest.md"
-    ).read_text()
+    ).read_text(encoding="utf-8")
 
     assert "UserTest" in content
     assert "LoginTests" in content
@@ -339,11 +379,18 @@ def test_generator_handles_nested_inner_classes(tmp_path):
 
     output_dir = tmp_path / "docs"
 
-    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), _create_coverage_report(project), output_dir)
+    MarkdownGenerator().generate(
+        project,
+        _create_graph(project),
+        _create_report(project),
+        _create_project_documentation(project, _create_graph(project)),
+        _create_coverage_report(project),
+        output_dir
+    )
 
     content = (
         output_dir / "UserTest.md"
-    ).read_text()
+    ).read_text(encoding="utf-8")
 
     assert "UserTest" in content
     assert "LoginTests" in content
@@ -411,13 +458,20 @@ def test_generator_creates_index_file(tmp_path):
 
     output_dir = tmp_path / "docs"
 
-    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), _create_coverage_report(project), output_dir)
+    MarkdownGenerator().generate(
+        project,
+        _create_graph(project),
+        _create_report(project),
+        _create_project_documentation(project, _create_graph(project)),
+        _create_coverage_report(project),
+        output_dir
+    )
 
     index = output_dir / "index.md"
 
     assert index.exists()
 
-    content = index.read_text()
+    content = index.read_text(encoding="utf-8")
     print(content)
 
     # ------------------------
@@ -450,12 +504,12 @@ def test_generator_creates_index_file(tmp_path):
 
     assert "## Packages" in content
 
-    assert "### com.example.users" in content
-    assert "- [UserTests](UserTests.md)" in content
-    assert "- [LoginTests](UserTests.md)" in content
+    assert "### `com.example.users`" in content
+    assert "- [UserTests](UserTests.md#usertests)" in content
+    assert "- [LoginTests](UserTests.md#logintests)" in content
 
-    assert "### com.example.orders" in content
-    assert "[OrderTest](OrderTest.md)" in content
+    assert "### `com.example.orders`" in content
+    assert "[OrderTest](OrderTest.md#ordertest)" in content
 
 def test_generator_creates_dependencies(tmp_path):
     project = Project(
@@ -494,14 +548,18 @@ def test_generator_creates_dependencies(tmp_path):
 
     output_dir = tmp_path / "docs"
     
-    graph = _create_graph(project)
-    #print(graph)
-
-    MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), _create_coverage_report(project), output_dir)
+    MarkdownGenerator().generate(
+        project,
+        _create_graph(project),
+        _create_report(project),
+        _create_project_documentation(project, _create_graph(project)),
+        _create_coverage_report(project),
+        output_dir
+    )
 
     content = (
         output_dir / "UserTest.md"
-    ).read_text()
+    ).read_text(encoding="utf-8")
 
     #print(content)
     
@@ -520,79 +578,86 @@ def test_generator_creates_dependencies(tmp_path):
     assert "UserTest --> User" in content
     assert "UserTest --> Test" not in content
 
-    def test_generator_creates_coverage_report():
-        project = Project(
-            test_files=[
-                TestFile(
-                    path="UserTests.java",
-                    package="com.example.users",
-                    imports=["com.example.repositories.UserRepository", "com.example.orders.Order",
-                             "org.junit.jupiter.api.Test"],
-                    classes=[
-                        TestClass(
-                            name="UserTests",
-                            qualified_name="com.example.users.UserTest",
-                            fields=[Field(type="User", name="name", location=SourceLocation("UserTest.java", 8))],
-                            methods=[
-                                TestMethod(
-                                    name="shouldLogin",
-                                    is_test=True,
-                                ),
-                                TestMethod(
-                                    name="shouldDelete",
-                                    is_test=True,
-                                    is_disabled=True,
-                                ),
-                            ],
-                            nested_classes=[
-                                TestClass(
-                                    name="LoginTests",
-                                    qualified_name="com.example.users.UserTest.LoginTests",
-                                    methods=[
-                                        TestMethod(
-                                            name="shouldValidatePassword",
-                                            is_test=True,
-                                        )
-                                    ]
-                                )
-                            ],
-                        )
-                    ],
-                ),
-                TestFile(
-                    path="OrderTests.java",
-                    package="com.example.orders",
-                    imports=["com.example.repositories.UserRepository", "com.example.users.User"],
-                    classes=[
-                        TestClass(
-                            name="OrderTest",
-                            qualified_name="com.example.orders.OrderTest",
-                            fields=[Field(type="UserRepository", name="name",
-                                          location=SourceLocation("OrderTest.java", 16))],
-                            methods=[
-                                TestMethod(
-                                    name="shouldCreateOrder",
-                                    is_test=True,
-                                )
-                            ],
-                        )
-                    ],
-                ),
-            ]
-        )
+def test_generator_creates_coverage_report(tmp_path):
+    project = Project(
+        test_files=[
+            TestFile(
+                path="UserTests.java",
+                package="com.example.users",
+                imports=["com.example.repositories.UserRepository", "com.example.orders.Order",
+                         "org.junit.jupiter.api.Test"],
+                classes=[
+                    TestClass(
+                        name="UserTests",
+                        qualified_name="com.example.users.UserTest",
+                        fields=[Field(type="User", name="name", location=SourceLocation("UserTest.java", 8))],
+                        methods=[
+                            TestMethod(
+                                name="shouldLogin",
+                                is_test=True,
+                            ),
+                            TestMethod(
+                                name="shouldDelete",
+                                is_test=True,
+                                is_disabled=True,
+                            ),
+                        ],
+                        nested_classes=[
+                            TestClass(
+                                name="LoginTests",
+                                qualified_name="com.example.users.UserTest.LoginTests",
+                                methods=[
+                                    TestMethod(
+                                        name="shouldValidatePassword",
+                                        is_test=True,
+                                    )
+                                ]
+                            )
+                        ],
+                    )
+                ],
+            ),
+            TestFile(
+                path="OrderTests.java",
+                package="com.example.orders",
+                imports=["com.example.repositories.UserRepository", "com.example.users.User"],
+                classes=[
+                    TestClass(
+                        name="OrderTest",
+                        qualified_name="com.example.orders.OrderTest",
+                        fields=[Field(type="UserRepository", name="name",
+                                      location=SourceLocation("OrderTest.java", 16))],
+                        methods=[
+                            TestMethod(
+                                name="shouldCreateOrder",
+                                is_test=True,
+                            )
+                        ],
+                    )
+                ],
+            ),
+        ]
+    )
 
-        output_dir = tmp_path / "docs"
+    output_dir = tmp_path / "docs"
 
-        MarkdownGenerator().generate(project, _create_graph(project), _create_report(project), _create_coverage_report(project), output_dir)
+    MarkdownGenerator().generate(
+            project,
+            _create_graph(project),
+        _create_report(project),
+        _create_project_documentation(project, _create_graph(project)),
+        _create_coverage_report(project),
+        output_dir
+    )
 
-        content = (
-            output_dir / "coverage_report.md"
-        )
-        print(content)
+    content = (
+        output_dir / "coverage_report.md"
+    ).read_text(encoding="utf-8")
+    #print(content)
 
-        assert "# Coverage Report" in content
-        assert "## Coverage" in content
-        assert "### com.example.orders.Order" in content
-        assert "- [OrderTest](OrderTest.md)" in content
-        assert "- [UserTest](UserTest.md)" in content
-        assert "### com.example.users.User" in content
+    assert "# Coverage Report" in content
+    assert "## Coverage" in content
+    assert "### com.example.orders.Order" in content
+    assert "- [com.example.orders.OrderTest](OrderTest.md#ordertest)" in content
+    assert "- [com.example.users.UserTest](UserTest.md#usertest)" in content
+    assert "### com.example.users.User" in content
