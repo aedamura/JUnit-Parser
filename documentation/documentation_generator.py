@@ -37,6 +37,7 @@ class DocumentationGenerator:
             self._create_method_doc(
                 method
             ) for method in test_class.methods
+            if method.is_test
         ]
 
         summary = self._create_class_summary(nested, methods)
