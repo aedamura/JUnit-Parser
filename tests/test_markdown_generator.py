@@ -3,7 +3,6 @@ import sys
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
-
 sys.path.append(parent_dir)
 
 from analysis.dependency_analyzer import DependencyAnalyzer
@@ -14,7 +13,6 @@ from analysis.project_analyzer import ProjectAnalyzer
 from analysis.coverage_analyzer import CoverageAnalyzer
 from documentation.documentation_generator import DocumentationGenerator
 from documentation.markdown_models import ProjectDocumentation
-
 
 def _create_graph(project: Project) -> DependencyGraph:
     return DependencyAnalyzer().analyze(project)

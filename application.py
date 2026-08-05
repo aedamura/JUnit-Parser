@@ -7,7 +7,6 @@ from documentation.documentation_generator import DocumentationGenerator
 from documentation.markdown_generator import MarkdownGenerator
 from pipline import Pipeline
 
-
 class Application:
     def __init__(
         self,
@@ -24,7 +23,6 @@ class Application:
         self._dependency_analyzer = dependency_analyzer
         self._coverage_analyzer = coverage_analyzer
         self._documentation_generator = documentation_generator
-
 
     def run(self, input_directory: Path, output_directory: Path,) -> int:
         project = self._pipeline.run(input_directory)

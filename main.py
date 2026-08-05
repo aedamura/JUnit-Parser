@@ -13,7 +13,6 @@ from parsing.parser import JavaParser
 from pipline import Pipeline
 from parsing.scanner import FileScanner
 
-
 def main():
     parser = argparse.ArgumentParser(description="Generate Markdown documentation for JUnit test suites.")
     parser.add_argument("source", type=str, help="Path to the source directory containing Java test files.")
@@ -42,8 +41,6 @@ def main():
     print(f"Generated documentation for {num_test_files} test files.")
     print(f"Source directory: {args.source}")
     print(f"Output directory: {args.output}")
-
-
 
 if __name__ == "__main__":
     main()

@@ -3,10 +3,10 @@ import sys
 from textwrap import dedent
 
 from analysis.project_analyzer import ProjectAnalyzer
+from documentation.documentation_generator import DocumentationGenerator
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
-
 sys.path.append(parent_dir)
 
 from application import Application
@@ -168,8 +168,8 @@ def test_application_generates_documentation(tmp_path):
         markdown_generator=MarkdownGenerator(),
         project_analyzer=ProjectAnalyzer(),
         dependency_analyzer=DependencyAnalyzer(),
-        coverage_analyzer=CoverageAnalyzer(),
-        dependency_graph_generator=DependencyGraphGenerator(),
+        documentation_generator=DocumentationGenerator(),
+        coverage_analyzer=CoverageAnalyzer()
     )
 
     project = pipeline.run(test_dir)

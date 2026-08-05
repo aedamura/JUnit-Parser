@@ -3,12 +3,10 @@ import sys
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
-
 sys.path.append(parent_dir)
 
 from analysis.project_analyzer import ProjectAnalyzer
 from models import Project, TestFile, TestClass, TestMethod
-
 
 def test_behaves_correctly():
     project = Project(

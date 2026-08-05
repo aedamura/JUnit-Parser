@@ -6,7 +6,6 @@ from parsing.parser import JavaParser
 from parsing.scanner import FileScanner
 from analysis.analyzer import JUnitAnalyzer
 
-
 class Pipeline:
 
     def __init__(self, scanner: FileScanner, parser: JavaParser, analyzer: JUnitAnalyzer, indexer: Indexer):
@@ -17,7 +16,6 @@ class Pipeline:
 
     def run(self, input_directory: Path) -> Project:
         project = self._scanner.scan(input_directory)
-
 
         for test_file in project.test_files:
            self._parser.parse(test_file)

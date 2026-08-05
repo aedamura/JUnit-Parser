@@ -1,11 +1,7 @@
 import javalang
 
-from javalang.tree import ClassDeclaration, MethodDeclaration
-from parsing.annotations import (
-    is_test_annotation,
-    is_lifecycle_annotation,
-    is_meta_annotation, is_annotation
-)
+from javalang.tree import ClassDeclaration
+from parsing.annotations import is_annotation
 from models import Constructor, SourceLocation, TestClass, TestFile, TestMethod, Field
 
 class JavaParser:
@@ -109,8 +105,6 @@ class JavaParser:
                     location = self._create_location(constructor, file_path)
                 )
             )
-
-
 
     # ----------
     # OBJECT CONSTRUCTORS
