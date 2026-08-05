@@ -3,7 +3,6 @@ from pathlib import Path
 from analysis.coverage_analyzer import CoverageAnalyzer
 from analysis.dependency_analyzer import DependencyAnalyzer
 from analysis.project_analyzer import ProjectAnalyzer
-from documentation.dependency_generator import DependencyGraphGenerator
 from documentation.documentation_generator import DocumentationGenerator
 from documentation.markdown_generator import MarkdownGenerator
 from pipline import Pipeline
@@ -18,7 +17,6 @@ class Application:
         dependency_analyzer: DependencyAnalyzer,
         coverage_analyzer: CoverageAnalyzer,
         documentation_generator: DocumentationGenerator,
-        dependency_graph_generator: DependencyGraphGenerator
     ):
         self._pipeline = pipeline
         self._markdown_generator = markdown_generator
@@ -26,7 +24,6 @@ class Application:
         self._dependency_analyzer = dependency_analyzer
         self._coverage_analyzer = coverage_analyzer
         self._documentation_generator = documentation_generator
-        self._dependency_graph_generator = dependency_graph_generator
 
 
     def run(self, input_directory: Path, output_directory: Path,) -> int:
@@ -41,7 +38,6 @@ class Application:
         project_documentation = self._documentation_generator.generate(project, dependency_graph)
 
         self._markdown_generator.generate(project, dependency_graph, project_report, project_documentation, coverage_report, output_directory)
-        self._dependency_graph_generator.generate(dependency_graph, output_directory)
 
         return len(project.test_files)
 

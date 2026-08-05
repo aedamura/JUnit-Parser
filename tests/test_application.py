@@ -11,7 +11,6 @@ sys.path.append(parent_dir)
 
 from application import Application
 from analysis.dependency_analyzer import DependencyAnalyzer
-from documentation.dependency_generator import DependencyGraphGenerator
 from analysis.coverage_analyzer import CoverageAnalyzer
 from analysis.indexer import Indexer
 from analysis.analyzer import JUnitAnalyzer
